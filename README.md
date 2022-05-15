@@ -12,10 +12,10 @@ import formidable.{given, *}
 
 case class Person(name: String, age: Option[Int])
 
-val subject = Subject.behavior(summon[Form[Person]].default)
+val subject = Form.subject[Person]
 
 div(
-  summon[Form[Person]].form(subject),
+  Form[Person](subject),
   div(subject.map(_.toString)),
 )
 ```
@@ -25,6 +25,5 @@ Automatically derive outwatch forms for:
 - Primitives: `Int`, `String`, `Boolean`
 - `Option[T]`
 - `Seq[T]`
-- `Map[A,B]`
 - sealed traits
 - case classes
