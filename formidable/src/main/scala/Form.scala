@@ -12,12 +12,24 @@ import scala.compiletime.{constValueTuple, erasedValue, summonInline}
 
 // TODO: recursive case classes
 
+case class FormModifiers(
+  inputModifiers: VDomModifier = VDomModifier.empty,
+  buttonModifiers: VDomModifier = VDomModifier.empty,
+  checkboxModifiers: VDomModifier = VDomModifier.empty,
+)
+
 trait Form[T] {
-  def form(subject: Subject[T]): VNode
+  def apply(
+    subject: Subject[T],
+    formModifiers: FormModifiers = FormModifiers(),
+  ): VNode
   def default: T
 }
 
 object Form {
+  def apply[A](using instance: Form[A]): Form[A]              = instance
+  def subject[A](using instance: Form[A]): BehaviorSubject[A] = Subject.behavior(instance.default)
+
   inline def summonAll[A <: Tuple]: List[Form[_]] =
     inline erasedValue[A] match {
       case _: EmptyTuple => Nil
@@ -50,7 +62,10 @@ object Form {
           .asInstanceOf[Form[A]]
           .default
 
-      def form(subject: Subject[A]) = {
+      def apply(
+        subject: Subject[A],
+        formModifiers: FormModifiers,
+      ) = {
         val labelToInstance: Map[String, Form[A]] =
           instances.zip(labels).map { case (instance, label) => label -> instance.asInstanceOf[Form[A]] }.toMap
 
@@ -70,7 +85,7 @@ object Form {
           ),
           subject.map { value =>
             val label = labelForValue(value)
-            labelToInstance(label).form(subject)
+            labelToInstance(label)(subject, formModifiers)
           },
         )
       }
@@ -88,7 +103,7 @@ object Form {
           toTuple(instances.map(_.default), EmptyTuple),
         )
 
-      def form(subject: Subject[A]) = {
+      def apply(subject: Subject[A], formModifiers: FormModifiers) = {
         def listToTuple[T](l: List[T]): Tuple = l match {
           case x :: rest => x *: listToTuple(rest)
           case Nil       => EmptyTuple
@@ -106,13 +121,13 @@ object Form {
           paddingLeft := "8px",
           subjects.map { subjects =>
             instances.zip(subjects).zip(labels).map { case ((instance, sub), label) =>
-              val f = (instance.form _).asInstanceOf[(Subject[Any] => VNode)]
+              val f = (instance.apply _).asInstanceOf[((Subject[Any], FormModifiers) => VNode)]
               div(
                 display.flex,
                 flexDirection.column,
                 justifyContent.start,
-                div(label, width         := "80px"),
-                div(f(sub), marginBottom := "4px"),
+                div(label, width                        := "80px"),
+                div(f(sub, formModifiers), marginBottom := "4px"),
               )
             }
           },
