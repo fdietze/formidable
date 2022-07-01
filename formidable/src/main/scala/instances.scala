@@ -3,6 +3,7 @@ package formidable
 import outwatch._
 import outwatch.dsl._
 import colibri._
+import colibri.reactive._
 import org.scalajs.dom.console
 import org.scalajs.dom.HTMLInputElement
 
@@ -13,16 +14,16 @@ import scala.compiletime.{constValueTuple, erasedValue, summonInline}
 // TODO: List instead of only Seq
 
 given Form[String] with {
-  def default                                                       = ""
-  def apply(subject: Subject[String], formModifiers: FormModifiers) =
-    inputField(subject, inputTpe = "text", parse = str => str, toValue = value => value)(formModifiers.inputModifiers)
+  def default                                                              = ""
+  def apply(state: Var[String], formModifiers: FormModifiers)(using Owner) =
+    inputField(state, inputTpe = "text", parse = str => str, toValue = value => value)(formModifiers.inputModifiers)
 }
 
 given Form[Int] with {
-  def default                                                    = 0
-  def apply(subject: Subject[Int], formModifiers: FormModifiers) =
+  def default                                                           = 0
+  def apply(state: Var[Int], formModifiers: FormModifiers)(using Owner) =
     inputField(
-      subject,
+      state,
       inputTpe = "number",
       parse = { case str if str.toIntOption.isDefined => str.toInt },
       toValue = value => value.toString,
@@ -30,55 +31,56 @@ given Form[Int] with {
 }
 
 given Form[Boolean] with {
-  def default                                                        = false
-  def apply(subject: Subject[Boolean], formModifiers: FormModifiers) =
+  def default                                                               = false
+  def apply(state: Var[Boolean], formModifiers: FormModifiers)(using Owner) =
     input(
       tpe := "checkbox",
-      checked <-- subject,
-      onClick.checked --> subject,
+      checked <-- state,
+      onClick.checked --> state,
       formModifiers.checkboxModifiers,
     ),
 }
 
 given optionForm[T: Form]: Form[Option[T]] with {
-  def default                                                          = None
-  def apply(subject: Subject[Option[T]], formModifiers: FormModifiers) = {
-    val seqSubject: Subject[Seq[T]] = subject.imapSubject[Seq[T]](_.headOption)(_.toSeq)
-    var innerBackup: T              = summon[Form[T]].default
+  def default                                                                 = None
+  def apply(state: Var[Option[T]], formModifiers: FormModifiers)(using Owner) = {
+    val seqState: Var[Seq[T]] = state.imap[Seq[T]](_.headOption)(_.toSeq)
+    var innerBackup: T        = summon[Form[T]].default
 
     div(
       display.flex,
       alignItems.center,
       input(
         tpe := "checkbox",
-        checked <-- subject.map(_.isDefined),
+        checked <-- state.map(_.isDefined),
         onClick.checked.map {
           case true  => Some(innerBackup)
           case false => None
-        } --> subject,
+        } --> state,
         formModifiers.checkboxModifiers,
       ),
-      seqSubject.sequence.map(
-        _.map(innerSub =>
-          VDomModifier(Form[T](innerSub, formModifiers), managedFunction(() => innerSub.foreach(innerBackup = _))),
-        ),
+      seqState.sequence.map(
+        _.map { innerState =>
+          innerState.foreach(innerBackup = _)
+          Form[T](innerState, formModifiers),
+        },
       ),
     )
   }
 }
 
 given seqForm[T: Form]: Form[Seq[T]] with {
-  def default                                                       = Seq.empty
-  def apply(subject: Subject[Seq[T]], formModifiers: FormModifiers) = {
+  def default                                                              = Seq.empty
+  def apply(state: Var[Seq[T]], formModifiers: FormModifiers)(using Owner) = {
     div(
-      subject.sequence.map(
-        _.zipWithIndex.map { case (innerSub, i) =>
+      state.sequence.map(
+        _.zipWithIndex.map { case (innerState, i) =>
           div(
-            Form[T](innerSub, formModifiers),
+            Form[T](innerState, formModifiers),
             button(
               "remove",
-              onClick.stopPropagation(subject).foreach { nowValue =>
-                subject.onNext(nowValue.patch(i, Nil, 1))
+              onClick.stopPropagation(state).foreach { nowValue =>
+                state.set(nowValue.patch(i, Nil, 1))
               },
               formModifiers.buttonModifiers,
             ),
@@ -87,8 +89,8 @@ given seqForm[T: Form]: Form[Seq[T]] with {
       ),
       button(
         "add",
-        onClick(subject).foreach { nowValue =>
-          subject.onNext(nowValue :+ Form[T].default)
+        onClick(state).foreach { nowValue =>
+          state.set(nowValue :+ Form[T].default)
         },
         formModifiers.buttonModifiers,
       ),
@@ -97,12 +99,12 @@ given seqForm[T: Form]: Form[Seq[T]] with {
 }
 
 private def inputField[T](
-  subject: Subject[T],
+  state: Var[T],
   inputTpe: String,
   parse: PartialFunction[String, T],
   toValue: T => String,
-) = input(
+)(using Owner) = input(
   tpe := inputTpe,
-  value <-- subject.map(toValue),
-  onInput.value.collect(parse) --> subject,
+  value <-- state.map(toValue),
+  onInput.value.collect(parse) --> state,
 )

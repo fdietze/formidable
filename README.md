@@ -21,11 +21,11 @@ import formidable.{given, *}
 
 case class Person(name: String, age: Option[Int])
 
-val subject = Form.subject[Person]
+val state = Form.state[Person]
 
 div(
-  Form[Person](subject),
-  div(subject.map(_.toString)),
+  Form[Person](state),
+  div(state.map(_.toString)),
 )
 ```
 
@@ -36,3 +36,7 @@ Automatically derive outwatch forms for:
 - `Seq[T]`
 - sealed traits
 - case classes
+
+TODO:
+- recursive case classes (Leaf/Node tree)
+- Any `Seq[T]`, like `Vector[T]`

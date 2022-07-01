@@ -3,6 +3,7 @@ package formidable
 import outwatch._
 import outwatch.dsl._
 import colibri._
+import colibri.reactive._
 import org.scalajs.dom.console
 import org.scalajs.dom.HTMLInputElement
 
@@ -13,22 +14,22 @@ import scala.compiletime.{constValueTuple, erasedValue, summonInline}
 // TODO: recursive case classes
 
 case class FormModifiers(
-  inputModifiers: VDomModifier = VDomModifier.empty,
-  buttonModifiers: VDomModifier = VDomModifier.empty,
-  checkboxModifiers: VDomModifier = VDomModifier.empty,
+  inputModifiers: VModifier = VModifier.empty,
+  buttonModifiers: VModifier = VModifier.empty,
+  checkboxModifiers: VModifier = VModifier.empty,
 )
 
 trait Form[T] {
   def apply(
-    subject: Subject[T],
+    state: Var[T],
     formModifiers: FormModifiers = FormModifiers(),
-  ): VNode
+  )(using Owner): VModifier
   def default: T
 }
 
 object Form {
-  def apply[A](using instance: Form[A]): Form[A]              = instance
-  def subject[A](using instance: Form[A]): BehaviorSubject[A] = Subject.behavior(instance.default)
+  def apply[A](using instance: Form[A]): Form[A] = instance
+  def state[A](using instance: Form[A]): Var[A]  = Var(instance.default)
 
   inline def summonAll[A <: Tuple]: List[Form[_]] =
     inline erasedValue[A] match {
@@ -41,7 +42,7 @@ object Form {
     case (h :: t) => h *: toTuple(t, acc)
   }
 
-  inline given derived[A](using m: Mirror.Of[A]): Form[A] = {
+  inline given derived[A](using m: Mirror.Of[A])(using Owner): Form[A] = {
     lazy val instances = summonAll[m.MirroredElemTypes]
     val labels         = constValueTuple[m.MirroredElemLabels].toList.asInstanceOf[List[String]]
 
@@ -63,9 +64,9 @@ object Form {
           .default
 
       def apply(
-        subject: Subject[A],
+        state: Var[A],
         formModifiers: FormModifiers,
-      ) = {
+      )(using Owner) = {
         val labelToInstance: Map[String, Form[A]] =
           instances.zip(labels).map { case (instance, label) => label -> instance.asInstanceOf[Form[A]] }.toMap
 
@@ -78,14 +79,14 @@ object Form {
             instances.zip(labels).map { case (instance, label) =>
               option(
                 label,
-                selected <-- subject.map(x => labelForValue(x) == label),
+                selected <-- state.map(x => labelForValue(x) == label),
               )
             },
-            onChange.value.map(label => labelToInstance(label).default) --> subject,
+            onChange.value.map(label => labelToInstance(label).default) --> state,
           ),
-          subject.map { value =>
+          state.map { value =>
             val label = labelForValue(value)
-            labelToInstance(label)(subject, formModifiers)
+            labelToInstance(label)(state, formModifiers)
           },
         )
       }
@@ -96,32 +97,32 @@ object Form {
     p: Mirror.ProductOf[A],
     instances: => List[Form[_]],
     labels: List[String],
-  ): Form[A] =
+  )(using Owner): Form[A] =
     new Form[A] {
       def default: A =
         p.fromProduct(
           toTuple(instances.map(_.default), EmptyTuple),
         )
 
-      def apply(subject: Subject[A], formModifiers: FormModifiers) = {
+      def apply(state: Var[A], formModifiers: FormModifiers)(using Owner) = {
         def listToTuple[T](l: List[T]): Tuple = l match {
           case x :: rest => x *: listToTuple(rest)
           case Nil       => EmptyTuple
         }
 
-        val x: Subject[Seq[Any]] =
-          subject
-            .imapSubject[Seq[Any]](x => p.fromProduct(listToTuple(x.toList)))(
+        val x: Var[Seq[Any]] =
+          state
+            .imap[Seq[Any]](x => p.fromProduct(listToTuple(x.toList)))(
               _.asInstanceOf[Product].productIterator.toList,
             )
 
-        val subjects = x.sequence
+        val states = x.sequence
 
         div(
           paddingLeft := "8px",
-          subjects.map { subjects =>
-            instances.zip(subjects).zip(labels).map { case ((instance, sub), label) =>
-              val f = (instance.apply _).asInstanceOf[((Subject[Any], FormModifiers) => VNode)]
+          states.map { states =>
+            instances.zip(states).zip(labels).map { case ((instance, sub), label) =>
+              val f = (instance.apply _).asInstanceOf[((Var[Any], FormModifiers) => VNode)]
               div(
                 display.flex,
                 flexDirection.column,

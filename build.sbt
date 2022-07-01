@@ -2,12 +2,12 @@ Global / onChangedBuildSource := IgnoreSourceChanges // not working well with we
 
 name                     := "Formidable"
 ThisBuild / organization := "com.github.fdietze"
-ThisBuild / version      := "0.1.0-SNAPSHOT"
-ThisBuild / scalaVersion := "3.1.1"
+ThisBuild / scalaVersion := "3.1.2"
 
 val versions = new {
-  val outwatch  = "1.0.0-RC6+2-6728c9c7-SNAPSHOT"
-  val scalaTest = "3.2.11"
+  val outwatch  = "1.0.0-RC8"
+  val colibri   = "0.5.0+20-56f388c5-SNAPSHOT" // https://github.com/cornerman/colibri/pull/203
+  val scalaTest = "3.2.12"
 }
 
 ThisBuild / resolvers ++= Seq(
@@ -28,8 +28,9 @@ lazy val formidable = project
   )
   .settings(
     libraryDependencies          ++= Seq(
-      "io.github.outwatch" %%% "outwatch"  % versions.outwatch,
-      "org.scalatest"      %%% "scalatest" % versions.scalaTest % Test,
+      "io.github.outwatch"   %%% "outwatch"         % versions.outwatch,
+      "com.github.cornerman" %%% "colibri-reactive" % versions.colibri,
+      "org.scalatest"        %%% "scalatest"        % versions.scalaTest % Test,
     ),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
     Compile / npmDevDependencies ++= readJsDependencies(baseDirectory.value, "devDependencies"),
