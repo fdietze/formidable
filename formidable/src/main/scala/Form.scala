@@ -13,16 +13,10 @@ import scala.compiletime.{constValueTuple, erasedValue, summonInline}
 
 // TODO: recursive case classes
 
-case class FormModifiers(
-  inputModifiers: VModifier = VModifier.empty,
-  buttonModifiers: VModifier = VModifier.empty,
-  checkboxModifiers: VModifier = VModifier.empty,
-)
-
 trait Form[T] {
   def apply(
     state: Var[T],
-    formModifiers: FormModifiers = FormModifiers(),
+    config: FormConfig = FormConfig.default,
   )(using Owner): VModifier
   def default: T
 }
@@ -65,7 +59,7 @@ object Form {
 
       def apply(
         state: Var[A],
-        formModifiers: FormModifiers,
+        config: FormConfig,
       )(using Owner) = {
         val labelToInstance: Map[String, Form[A]] =
           instances.zip(labels).map { case (instance, label) => label -> instance.asInstanceOf[Form[A]] }.toMap
@@ -86,7 +80,7 @@ object Form {
           ),
           state.map { value =>
             val label = labelForValue(value)
-            labelToInstance(label)(state, formModifiers)
+            labelToInstance(label)(state, config)
           },
         )
       }
@@ -104,7 +98,7 @@ object Form {
           toTuple(instances.map(_.default), EmptyTuple),
         )
 
-      def apply(state: Var[A], formModifiers: FormModifiers)(using Owner) = {
+      def apply(state: Var[A], config: FormConfig)(using Owner) = {
         def listToTuple[T](l: List[T]): Tuple = l match {
           case x :: rest => x *: listToTuple(rest)
           case Nil       => EmptyTuple
@@ -122,13 +116,13 @@ object Form {
           paddingLeft := "8px",
           states.map { states =>
             instances.zip(states).zip(labels).map { case ((instance, sub), label) =>
-              val f = (instance.apply _).asInstanceOf[((Var[Any], FormModifiers) => VNode)]
+              val f = (instance.apply _).asInstanceOf[((Var[Any], FormConfig) => VNode)]
               div(
                 display.flex,
                 flexDirection.column,
                 justifyContent.start,
-                div(label, width                        := "80px"),
-                div(f(sub, formModifiers), marginBottom := "4px"),
+                div(label, width                 := "80px"),
+                div(f(sub, config), marginBottom := "4px"),
               )
             }
           },

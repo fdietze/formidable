@@ -11,100 +11,89 @@ import scala.deriving.Mirror
 import scala.deriving._
 import scala.compiletime.{constValueTuple, erasedValue, summonInline}
 
-// TODO: List instead of only Seq
+// TODO: List, Vector instead of only Seq
 
 given Form[String] with {
-  def default                                                              = ""
-  def apply(state: Var[String], formModifiers: FormModifiers)(using Owner) =
-    inputField(state, inputTpe = "text", parse = str => str, toValue = value => value)(formModifiers.inputModifiers)
+  def default                                                    = ""
+  def apply(state: Var[String], config: FormConfig)(using Owner) = config.textInput(state)
 }
 
 given Form[Int] with {
-  def default                                                           = 0
-  def apply(state: Var[Int], formModifiers: FormModifiers)(using Owner) =
-    inputField(
+  def default                                                 = 0
+  def apply(state: Var[Int], config: FormConfig)(using Owner) =
+    encodedTextInput[Int](
       state,
-      inputTpe = "number",
-      parse = { case str if str.toIntOption.isDefined => str.toInt },
-      toValue = value => value.toString,
+      encode = _.toString,
+      decode = str =>
+        str.toIntOption match {
+          case Some(int) => Right(int)
+          case None      => Left(s"'$str' could not be parsed as Int")
+        },
+      config,
     )
 }
 
 given Form[Boolean] with {
-  def default                                                               = false
-  def apply(state: Var[Boolean], formModifiers: FormModifiers)(using Owner) =
-    input(
-      tpe := "checkbox",
-      checked <-- state,
-      onClick.checked --> state,
-      formModifiers.checkboxModifiers,
-    ),
+  def default                                                     = false
+  def apply(state: Var[Boolean], config: FormConfig)(using Owner) = config.checkbox(state)
 }
 
 given optionForm[T: Form]: Form[Option[T]] with {
-  def default                                                                 = None
-  def apply(state: Var[Option[T]], formModifiers: FormModifiers)(using Owner) = {
-    val seqState: Var[Seq[T]] = state.imap[Seq[T]](_.headOption)(_.toSeq)
-    var innerBackup: T        = summon[Form[T]].default
+  def default                                                       = None
+  def apply(state: Var[Option[T]], config: FormConfig)(using Owner) = {
+    var innerBackup: T = summon[Form[T]].default
 
-    div(
-      display.flex,
-      alignItems.center,
-      input(
-        tpe := "checkbox",
-        checked <-- state.map(_.isDefined),
-        onClick.checked.map {
-          case true  => Some(innerBackup)
-          case false => None
-        } --> state,
-        formModifiers.checkboxModifiers,
-      ),
-      seqState.sequence.map(
+    val checkboxState = state.transformVar[Boolean](_.contramap {
+      case true  => Some(innerBackup)
+      case false => None
+    })(_.map(_.isDefined))
+
+    config.withCheckbox(
+      subForm = state.sequence.map(
         _.map { innerState =>
           innerState.foreach(innerBackup = _)
-          Form[T](innerState, formModifiers),
+          Form[T](innerState, config),
         },
       ),
+      checkbox = config.checkbox(checkboxState),
     )
   }
 }
 
 given seqForm[T: Form]: Form[Seq[T]] with {
-  def default                                                              = Seq.empty
-  def apply(state: Var[Seq[T]], formModifiers: FormModifiers)(using Owner) = {
-    div(
-      state.sequence.map(
+  def default                                                    = Seq.empty
+  def apply(state: Var[Seq[T]], config: FormConfig)(using Owner) = {
+    config.withAddButton(
+      subForm = state.sequence.map(
         _.zipWithIndex.map { case (innerState, i) =>
-          div(
-            Form[T](innerState, formModifiers),
-            button(
-              "remove",
-              onClick.stopPropagation(state).foreach { nowValue =>
-                state.set(nowValue.patch(i, Nil, 1))
-              },
-              formModifiers.buttonModifiers,
-            ),
+          config.withRemoveButton(
+            subForm = Form[T](innerState, config),
+            removeButton = config.removeButton(() => state.update(_.patch(i, Nil, 1))),
           )
         },
       ),
-      button(
-        "add",
-        onClick(state).foreach { nowValue =>
-          state.set(nowValue :+ Form[T].default)
-        },
-        formModifiers.buttonModifiers,
-      ),
+      addButton = config.addButton(() => state.update(_ :+ Form[T].default)),
     )
   }
 }
 
-private def inputField[T](
+private def encodedTextInput[T](
   state: Var[T],
-  inputTpe: String,
-  parse: PartialFunction[String, T],
-  toValue: T => String,
-)(using Owner) = input(
-  tpe := inputTpe,
-  value <-- state.map(toValue),
-  onInput.value.collect(parse) --> state,
-)
+  encode: T => String,
+  decode: String => Either[String, T],
+  config: FormConfig,
+)(using Owner) = {
+  val fieldState                             = Var(encode(state.now()))
+  val validationMessage: Var[Option[String]] = Var(None)
+
+  state.foreach { value => fieldState.set(encode(value)) }
+  fieldState.map(decode).foreach {
+    case Left(msg)    =>
+      validationMessage.set(Some(msg))
+    case Right(value) =>
+      validationMessage.set(None)
+      state.set(value)
+  }
+
+  config.textInput(fieldState, validationMessage)
+}
