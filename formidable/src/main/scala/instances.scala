@@ -63,16 +63,16 @@ given optionForm[T: Form]: Form[Option[T]] with {
 given seqForm[T: Form]: Form[Seq[T]] with {
   def default                                                    = Seq.empty
   def apply(state: Var[Seq[T]], config: FormConfig)(using Owner) = {
-    config.withAddButton(
-      subForm = state.sequence.map(
-        _.zipWithIndex.map { case (innerState, i) =>
+    state.sequence.map(seq =>
+      config.formSequence(
+        seq.zipWithIndex.map { case (innerState, i) =>
           config.withRemoveButton(
             subForm = Form[T](innerState, config),
             removeButton = config.removeButton(() => state.update(_.patch(i, Nil, 1))),
-          )
+          ),
         },
+        addButton = config.addButton(() => state.update(_ :+ Form[T].default)),
       ),
-      addButton = config.addButton(() => state.update(_ :+ Form[T].default)),
     )
   }
 }
@@ -95,5 +95,5 @@ private def encodedTextInput[T](
       state.set(value)
   }
 
-  config.textInput(fieldState, validationMessage)
+  config.textInput(fieldState, validationMessage = validationMessage)
 }

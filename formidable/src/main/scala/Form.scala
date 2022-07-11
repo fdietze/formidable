@@ -110,23 +110,17 @@ object Form {
               _.asInstanceOf[Product].productIterator.toList,
             )
 
-        val states = x.sequence
-
-        div(
-          paddingLeft := "8px",
-          states.map { states =>
-            instances.zip(states).zip(labels).map { case ((instance, sub), label) =>
-              val f = (instance.apply _).asInstanceOf[((Var[Any], FormConfig) => VNode)]
-              div(
-                display.flex,
-                flexDirection.column,
-                justifyContent.start,
-                div(label, width                 := "80px"),
-                div(f(sub, config), marginBottom := "4px"),
-              )
-            }
-          },
-        )
+        x.sequence.map { states =>
+          config.labeledFormGroup(
+            instances
+              .zip(states)
+              .zip(labels)
+              .map { case ((instance, sub), label) =>
+                val f = (instance.apply _).asInstanceOf[((Var[Any], FormConfig) => VNode)]
+                label -> f(sub, config)
+              },
+          )
+        }
       }
     }
 

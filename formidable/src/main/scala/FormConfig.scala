@@ -13,8 +13,22 @@ import scala.compiletime.{constValueTuple, erasedValue, summonInline}
 
 trait FormConfig  {
   def withRemoveButton(subForm: VModifier, removeButton: VModifier) = div(display.flex, subForm, removeButton)
-  def withAddButton(subForm: VModifier, addButton: VModifier)       = div(subForm, addButton)
   def withCheckbox(subForm: VModifier, checkbox: VModifier)         = div(display.flex, checkbox, subForm)
+  def withLabel(subForm: VModifier, label: VModifier)               = div(display.flex, label, subForm)
+
+  def unlabeledFormGroup(subForms: Seq[VModifier])         = div(display.flex, VModifier.style("gap") := "0.5rem", subForms)
+  def labeledFormGroup(subForms: Seq[(String, VModifier)]) =
+    table(
+      subForms.map { case (label, subForm) => tr(td(b(label, ": "), verticalAlign := "top"), td(subForm)) },
+    )
+
+  def formSequence(subForms: Seq[VModifier], addButton: VModifier) =
+    div(
+      display.flex,
+      flexDirection.column,
+      VModifier.style("gap") := "0.5rem",
+      subForms,
+    )
 
   def addButton(action: () => Unit) =
     button(
@@ -39,10 +53,17 @@ trait FormConfig  {
       onClick.stopPropagation.checked --> state,
     )
 
-  def textInput(state: Var[String], validationMessage: Rx[Option[String]] = Rx.const(None))(using Owner) = {
+  def textInput(
+    state: Var[String],
+    inputPlaceholder: String = "",
+    validationMessage: Rx[Option[String]] = Rx.const(None),
+  )(using
+    Owner,
+  ): VNode = {
     div(
       input(
-        tpe := "text",
+        tpe         := "text",
+        placeholder := inputPlaceholder,
         value <-- state,
         onInput.stopPropagation.value --> state,
       ),
