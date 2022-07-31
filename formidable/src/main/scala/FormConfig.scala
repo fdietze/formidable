@@ -7,16 +7,13 @@ import colibri.reactive._
 import org.scalajs.dom.console
 import org.scalajs.dom.HTMLInputElement
 
-import scala.deriving.Mirror
-import scala.deriving._
-import scala.compiletime.{constValueTuple, erasedValue, summonInline}
+trait FormConfig {
+  def withRemoveButton(subForm: VModifier, removeButton: VModifier) =
+    div(display.flex, alignItems.flexStart, removeButton, subForm)
+  def withCheckbox(subForm: VModifier, checkbox: VModifier) = div(display.flex, alignItems.flexStart, checkbox, subForm)
+  def withLabel(subForm: VModifier, label: VModifier)       = div(display.flex, label, subForm)
 
-trait FormConfig  {
-  def withRemoveButton(subForm: VModifier, removeButton: VModifier) = div(display.flex, subForm, removeButton)
-  def withCheckbox(subForm: VModifier, checkbox: VModifier)         = div(display.flex, checkbox, subForm)
-  def withLabel(subForm: VModifier, label: VModifier)               = div(display.flex, label, subForm)
-
-  def unlabeledFormGroup(subForms: Seq[VModifier])         = div(display.flex, VModifier.style("gap") := "0.5rem", subForms)
+  def unlabeledFormGroup(subForms: Seq[VModifier]) = div(display.flex, VModifier.style("gap") := "0.5rem", subForms)
   def labeledFormGroup(subForms: Seq[(String, VModifier)]) =
     table(
       subForms.map { case (label, subForm) => tr(td(b(label, ": "), verticalAlign := "top"), td(subForm)) },
@@ -28,6 +25,7 @@ trait FormConfig  {
       flexDirection.column,
       VModifier.style("gap") := "0.5rem",
       subForms,
+      addButton,
     )
 
   def addButton(action: () => Unit) =
@@ -46,7 +44,7 @@ trait FormConfig  {
       },
     )
 
-  def checkbox(state: Var[Boolean])(using Owner) =
+  def checkbox(state: Var[Boolean])(implicit owner: Owner) =
     input(
       tpe := "checkbox",
       checked <-- state,
@@ -57,9 +55,7 @@ trait FormConfig  {
     state: Var[String],
     inputPlaceholder: String = "",
     validationMessage: Rx[Option[String]] = Rx.const(None),
-  )(using
-    Owner,
-  ): VNode = {
+  )(implicit owner: Owner): VNode = {
     div(
       input(
         tpe         := "text",
