@@ -6,7 +6,7 @@ ThisBuild / scalaVersion := "3.1.3"
 
 val versions = new {
   val outwatch  = "1.0.0-RC8"
-  val colibri   = "0.6.0+3-ff10e1ed+20220702-2309-SNAPSHOT" // https://github.com/cornerman/colibri/pull/203
+  val colibri   = "fc5d518" // https://github.com/cornerman/colibri/pull/203
   val funPack   = "0.2.0"
   val scalaTest = "3.2.12"
 }
@@ -42,15 +42,16 @@ lazy val formidable = project
     ScalaJSPlugin,
     ScalaJSBundlerPlugin,
   )
-  .dependsOn(ProjectRef(file("../colibri"), "colibri"))  // TODO: specific commit
-  .dependsOn(ProjectRef(file("../colibri"), "reactive")) // TODO: specific commit
+  /* .dependsOn(ProjectRef(file("../colibri"), "colibri"))  // TODO: specific commit */
+  /* .dependsOn(ProjectRef(file("../colibri"), "reactive")) // TODO: specific commit */
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "io.github.outwatch" %%% "outwatch" % versions.outwatch,
-      /* "com.github.cornerman" %%% "colibri"          % versions.colibri, */
-      /* "com.github.cornerman" %%% "colibri-reactive" % versions.colibri, */
-      "org.scalatest" %%% "scalatest" % versions.scalaTest % Test,
+      "io.github.outwatch"           %%% "outwatch"         % versions.outwatch,
+      "com.github.cornerman.colibri" %%% "colibri"          % versions.colibri,
+      "com.github.cornerman.colibri" %%% "colibri-reactive" % versions.colibri,
+      "org.scalatest"                %%% "scalatest"        % versions.scalaTest % Test,
+      "com.softwaremill.magnolia1_3" %%% "magnolia"         % "1.1.4",
     ),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
     Compile / npmDevDependencies ++= readJsDependencies(baseDirectory.value, "devDependencies"),

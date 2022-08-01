@@ -11,7 +11,9 @@ import formidable.instances._
 import formidable.Form._
 
 case class Person(name: String, age: Option[Int], pets: Seq[Pet])
-case class Pet(name: String, weight: Double)
+sealed trait Pet
+case class Dog(name: String) extends Pet
+case class Cat(name: String) extends Pet
 
 object Main {
 
