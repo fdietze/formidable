@@ -54,17 +54,14 @@ package object instances {
   implicit def optionForm[T: Form]: Form[Option[T]] = new Form[Option[T]] {
     def default = None
     def apply(state: Var[Option[T]], config: FormConfig)(implicit owner: Owner) = {
-      var innerBackup: T = implicitly[Form[T]].default
-
       val checkboxState = state.transformVar[Boolean](_.contramap {
-        case true  => Some(innerBackup)
+        case true  => Some(Form[T].default)
         case false => None
       })(_.map(_.isDefined))
 
       config.withCheckbox(
         subForm = state.sequence.map(
           _.map { innerState =>
-            innerState.foreach(innerBackup = _)
             Form[T].apply(innerState, config)
           },
         ),

@@ -50,10 +50,6 @@ object Form extends AutoDerivation[Form] {
   override def split[T](ctx: SealedTrait[Form, T]):Form[T] = new Form[T] {
     override def default: T = ctx.subtypes.head.typeclass.default
     override def apply(state: Var[T], config: FormConfig)(using Owner): VModifier = {
-      def labelForValue(value: T): String = {
-        value.getClass.getSimpleName.split('$').head
-      }
-
       val labelToSubtype =
         ctx.subtypes.view.map { sub => sub.typeInfo.short -> sub }.toMap
 
@@ -67,8 +63,7 @@ object Form extends AutoDerivation[Form] {
           }.toSeq,
           onChange.value.map(label => labelToSubtype(label).typeclass.default) --> state,
         ),
-        state.map { (value:T) =>
-          val label = labelForValue(value)
+        state.map { value =>
           ctx.choose(value)(sub => sub.typeclass.asInstanceOf[Form[T]](state, config))
         },
       )

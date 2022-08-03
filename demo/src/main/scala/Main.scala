@@ -10,7 +10,7 @@ import formidable._
 import formidable.instances._
 import formidable.Form._
 
-case class Person(name: String, age: Option[Int], pets: Seq[Pet])
+case class Person(name: String = "hey", age: Option[Int] = Some(2), pets: Seq[Pet])
 sealed trait Pet
 case class Dog(name: String) extends Pet
 case class Cat(name: String) extends Pet
@@ -26,7 +26,8 @@ object Main {
 
     div(
       Form[Person].apply(state),
-      div(state.map(_.toString)),
+//      div(state.map(_.toString)),
+      div(state.observable.scanToList.map(_.take(4).map(e => div(e.toString)))),
     ): VModifier
   }
 
