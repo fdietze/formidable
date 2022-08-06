@@ -2,24 +2,23 @@ package formidable
 
 import outwatch._
 import outwatch.dsl._
-import colibri._
 import colibri.reactive._
-import org.scalajs.dom.console
-import org.scalajs.dom.HTMLInputElement
 
 trait FormConfig {
-  def withRemoveButton(subForm: VModifier, removeButton: VModifier) =
+  def withRemoveButton(subForm: VModifier, removeButton: VModifier): VModifier =
     div(display.flex, alignItems.flexStart, removeButton, subForm)
-  def withCheckbox(subForm: VModifier, checkbox: VModifier) = div(display.flex, alignItems.flexStart, checkbox, subForm)
-  def withLabel(subForm: VModifier, label: VModifier)       = div(display.flex, label, subForm)
+  def withCheckbox(subForm: VModifier, checkbox: VModifier): VModifier =
+    div(display.flex, alignItems.flexStart, checkbox, subForm)
+  def withLabel(subForm: VModifier, label: VModifier): VModifier = div(display.flex, label, subForm)
 
-  def unlabeledFormGroup(subForms: Seq[VModifier]) = div(display.flex, VModifier.style("gap") := "0.5rem", subForms)
-  def labeledFormGroup(subForms: Seq[(String, VModifier)]) =
+  def unlabeledFormGroup(subForms: Seq[VModifier]): VModifier =
+    div(display.flex, VModifier.style("gap") := "0.5rem", subForms)
+  def labeledFormGroup(subForms: Seq[(String, VModifier)]): VModifier =
     table(
       subForms.map { case (label, subForm) => tr(td(b(label, ": "), verticalAlign := "top"), td(subForm)) },
     )
 
-  def formSequence(subForms: Seq[VModifier], addButton: VModifier) =
+  def formSequence(subForms: Seq[VModifier], addButton: VModifier): VModifier =
     div(
       display.flex,
       flexDirection.column,
@@ -28,7 +27,7 @@ trait FormConfig {
       addButton,
     )
 
-  def addButton(action: () => Unit) =
+  def addButton(action: () => Unit): VModifier =
     button(
       "add",
       onClick.stopPropagation.doAction {
@@ -36,7 +35,7 @@ trait FormConfig {
       },
     )
 
-  def removeButton(action: () => Unit) =
+  def removeButton(action: () => Unit): VModifier =
     button(
       "remove",
       onClick.stopPropagation.doAction {
@@ -44,7 +43,7 @@ trait FormConfig {
       },
     )
 
-  def checkbox(state: Var[Boolean])(implicit owner: Owner) =
+  def checkbox(state: Var[Boolean])(implicit owner: Owner): VModifier =
     input(
       tpe := "checkbox",
       checked <-- state,
@@ -61,12 +60,14 @@ trait FormConfig {
         tpe         := "text",
         placeholder := inputPlaceholder,
         value <-- state,
-        onInput.stopPropagation.value --> state,
+        onInput.stopPropagation.value.map { x =>
+          println(s"onInput: $x"); x
+        } --> state,
       ),
       validationMessage.map(_.map(msg => div(msg, color.red))),
     )
   }
 }
 object FormConfig {
-  val default = new FormConfig {}
+  val default: FormConfig = new FormConfig {}
 }

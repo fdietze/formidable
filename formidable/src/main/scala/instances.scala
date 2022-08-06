@@ -1,70 +1,74 @@
 package formidable
 
-import outwatch._
-import outwatch.dsl._
-import colibri._
 import colibri.reactive._
-import org.scalajs.dom.console
-import org.scalajs.dom.HTMLInputElement
+import outwatch._
 
 // TODO: List, Vector instead of only Seq
 
 package object instances {
 
   implicit val stringForm: Form[String] = new Form[String] {
-    def default                                                              = ""
-    def apply(state: Var[String], config: FormConfig)(implicit owner: Owner) = config.textInput(state)
+    def default = ""
+    def apply(state: Var[String], config: FormConfig)(implicit owner: Owner) = {
+      config.textInput(state)
+    }
   }
 
   implicit val intForm: Form[Int] = new Form[Int] {
     def default = 0
-    def apply(state: Var[Int], config: FormConfig)(implicit owner: Owner) =
+    def apply(state: Var[Int], config: FormConfig)(implicit owner: Owner) = {
+      println(s"intForm apply: ${state.now()}")
       encodedTextInput[Int](
         state,
         encode = _.toString,
-        decode = str =>
-          str.toIntOption match {
-            case Some(int) => Right(int)
-            case None      => Left(s"'$str' could not be parsed as Int")
-          },
+        decode = str => str.toIntOption.toRight(s"'$str' could not be parsed as Int"),
         config,
       )
+    }
+  }
+
+  implicit val longForm: Form[Long] = new Form[Long] {
+    def default = 0
+    def apply(state: Var[Long], config: FormConfig)(implicit owner: Owner) = {
+      encodedTextInput[Long](
+        state,
+        encode = _.toString,
+        decode = str => str.toLongOption.toRight(s"'$str' could not be parsed as Long"),
+        config,
+      )
+    }
   }
 
   implicit val doubleForm: Form[Double] = new Form[Double] {
     def default = 0.0
-    def apply(state: Var[Double], config: FormConfig)(implicit owner: Owner) =
+    def apply(state: Var[Double], config: FormConfig)(implicit owner: Owner) = {
       encodedTextInput[Double](
         state,
         encode = _.toString,
-        decode = str =>
-          str.toDoubleOption match {
-            case Some(int) => Right(int)
-            case None      => Left(s"'$str' could not be parsed as Double")
-          },
+        decode = str => str.toDoubleOption.toRight(s"'$str' could not be parsed as Double"),
         config,
       )
+    }
   }
 
   implicit val booleanForm: Form[Boolean] = new Form[Boolean] {
-    def default                                                               = false
-    def apply(state: Var[Boolean], config: FormConfig)(implicit owner: Owner) = config.checkbox(state)
+    def default = false
+    def apply(state: Var[Boolean], config: FormConfig)(implicit owner: Owner) = {
+      config.checkbox(state)
+    }
   }
 
   implicit def optionForm[T: Form]: Form[Option[T]] = new Form[Option[T]] {
     def default = None
     def apply(state: Var[Option[T]], config: FormConfig)(implicit owner: Owner) = {
-      var innerBackup: T = implicitly[Form[T]].default
-
       val checkboxState = state.transformVar[Boolean](_.contramap {
-        case true  => Some(innerBackup)
+        case true  => Some(Form[T].default)
         case false => None
       })(_.map(_.isDefined))
 
       config.withCheckbox(
         subForm = state.sequence.map(
           _.map { innerState =>
-            innerState.foreach(innerBackup = _)
             Form[T].apply(innerState, config)
           },
         ),

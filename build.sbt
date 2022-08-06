@@ -1,12 +1,13 @@
 Global / onChangedBuildSource := IgnoreSourceChanges // not working well with webpack devserver
 
-name                     := "Formidable"
-ThisBuild / organization := "com.github.fdietze"
-ThisBuild / scalaVersion := "3.1.3"
+name                           := "Formidable"
+ThisBuild / organization       := "com.github.fdietze"
+ThisBuild / crossScalaVersions := Seq("2.13.8", "3.1.3")
+ThisBuild / scalaVersion       := "2.13.8"
 
 val versions = new {
   val outwatch  = "1.0.0-RC8"
-  val colibri   = "0.6.0+3-ff10e1ed+20220702-2309-SNAPSHOT" // https://github.com/cornerman/colibri/pull/203
+  val colibri   = "0.6.1"
   val funPack   = "0.2.0"
   val scalaTest = "3.2.12"
 }
@@ -25,16 +26,20 @@ lazy val scalaJsMacrotaskExecutor = Seq(
 
 def readJsDependencies(baseDirectory: File, field: String): Seq[(String, String)] = {
   val packageJson = ujson.read(IO.read(new File(s"$baseDirectory/package.json")))
-  packageJson(field).obj.mapValues(_.str.toString).toSeq
+  packageJson(field).obj.mapValues(_.str).toSeq
 }
 
 val enableFatalWarnings =
   sys.env.get("ENABLE_FATAL_WARNINGS").flatMap(value => scala.util.Try(value.toBoolean).toOption).getOrElse(false)
 
+val isScala3 = Def.setting(CrossVersion.partialVersion(scalaVersion.value).exists(_._1 == 3))
+
 lazy val commonSettings = Seq(
   // overwrite scalacOptions "-Xfatal-warnings" from https://github.com/DavidGregory084/sbt-tpolecat
   if (enableFatalWarnings) scalacOptions += "-Xfatal-warnings" else scalacOptions -= "-Xfatal-warnings",
-  scalacOptions ++= Seq("-Vimplicits", "-Vtype-diffs"),
+  scalacOptions ++= (if (isScala3.value) Nil
+                     else Seq("-Vimplicits", "-Vtype-diffs")), // better error messages for implicit resolution
+  scalacOptions ++= (if (isScala3.value) Seq("-Yretain-trees") else Nil), // recursive data structures with Scala 3
 )
 
 lazy val formidable = project
@@ -42,16 +47,16 @@ lazy val formidable = project
     ScalaJSPlugin,
     ScalaJSBundlerPlugin,
   )
-  .dependsOn(ProjectRef(file("../colibri"), "colibri"))  // TODO: specific commit
-  .dependsOn(ProjectRef(file("../colibri"), "reactive")) // TODO: specific commit
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "io.github.outwatch" %%% "outwatch" % versions.outwatch,
-      /* "com.github.cornerman" %%% "colibri"          % versions.colibri, */
-      /* "com.github.cornerman" %%% "colibri-reactive" % versions.colibri, */
-      "org.scalatest" %%% "scalatest" % versions.scalaTest % Test,
-    ),
+      "io.github.outwatch"   %%% "outwatch"         % versions.outwatch,
+      "com.github.cornerman" %%% "colibri"          % versions.colibri,
+      "com.github.cornerman" %%% "colibri-reactive" % versions.colibri,
+    ) ++
+      (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.1.4")
+       else
+         Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.2", "org.scala-lang" % "scala-reflect" % "2.13.8")),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
     Compile / npmDevDependencies ++= readJsDependencies(baseDirectory.value, "devDependencies"),
     useYarn                       := true, // Makes scalajs-bundler use yarn instead of npm
