@@ -43,7 +43,7 @@ trait FormConfig {
       },
     )
 
-  def checkbox(state: Var[Boolean])(implicit owner: Owner): VModifier =
+  def checkbox(state: Var[Boolean]): VModifier =
     input(
       tpe := "checkbox",
       checked <-- state,
@@ -54,18 +54,16 @@ trait FormConfig {
     state: Var[String],
     inputPlaceholder: String = "",
     validationMessage: Rx[Option[String]] = Rx.const(None),
-  )(implicit owner: Owner): VNode = {
+  ): VModifier = Owned {
     div(
       input(
         tpe         := "text",
         placeholder := inputPlaceholder,
         value <-- state,
-        onInput.stopPropagation.value.map { x =>
-          println(s"onInput: $x"); x
-        } --> state,
+        onInput.stopPropagation.value --> state,
       ),
       validationMessage.map(_.map(msg => div(msg, color.red))),
-    )
+    ): VModifier
   }
 }
 object FormConfig {

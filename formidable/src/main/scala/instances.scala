@@ -9,15 +9,14 @@ package object instances {
 
   implicit val stringForm: Form[String] = new Form[String] {
     def default = ""
-    def apply(state: Var[String], config: FormConfig)(implicit owner: Owner) = {
+    def apply(state: Var[String], config: FormConfig) = Owned {
       config.textInput(state)
     }
   }
 
   implicit val intForm: Form[Int] = new Form[Int] {
     def default = 0
-    def apply(state: Var[Int], config: FormConfig)(implicit owner: Owner) = {
-      println(s"intForm apply: ${state.now()}")
+    def apply(state: Var[Int], config: FormConfig) = Owned {
       encodedTextInput[Int](
         state,
         encode = _.toString,
@@ -29,7 +28,7 @@ package object instances {
 
   implicit val longForm: Form[Long] = new Form[Long] {
     def default = 0
-    def apply(state: Var[Long], config: FormConfig)(implicit owner: Owner) = {
+    def apply(state: Var[Long], config: FormConfig) = Owned {
       encodedTextInput[Long](
         state,
         encode = _.toString,
@@ -41,7 +40,7 @@ package object instances {
 
   implicit val doubleForm: Form[Double] = new Form[Double] {
     def default = 0.0
-    def apply(state: Var[Double], config: FormConfig)(implicit owner: Owner) = {
+    def apply(state: Var[Double], config: FormConfig) = Owned {
       encodedTextInput[Double](
         state,
         encode = _.toString,
@@ -53,14 +52,14 @@ package object instances {
 
   implicit val booleanForm: Form[Boolean] = new Form[Boolean] {
     def default = false
-    def apply(state: Var[Boolean], config: FormConfig)(implicit owner: Owner) = {
+    def apply(state: Var[Boolean], config: FormConfig) = Owned {
       config.checkbox(state)
     }
   }
 
   implicit def optionForm[T: Form]: Form[Option[T]] = new Form[Option[T]] {
     def default = None
-    def apply(state: Var[Option[T]], config: FormConfig)(implicit owner: Owner) = {
+    def apply(state: Var[Option[T]], config: FormConfig) = Owned {
       val checkboxState = state.transformVar[Boolean](_.contramap {
         case true  => Some(Form[T].default)
         case false => None
@@ -79,7 +78,7 @@ package object instances {
 
   implicit def seqForm[T: Form]: Form[Seq[T]] = new Form[Seq[T]] {
     def default = Seq.empty
-    def apply(state: Var[Seq[T]], config: FormConfig)(implicit owner: Owner) = {
+    def apply(state: Var[Seq[T]], config: FormConfig) = Owned {
       state.sequence.map(seq =>
         config.formSequence(
           seq.zipWithIndex.map { case (innerState, i) =>
@@ -90,7 +89,7 @@ package object instances {
           },
           addButton = config.addButton(() => state.update(_ :+ Form[T].default)),
         ),
-      )
+      ): VModifier
     }
   }
 
@@ -99,7 +98,7 @@ package object instances {
     encode: T => String,
     decode: String => Either[String, T],
     config: FormConfig,
-  )(implicit owner: Owner): VNode = {
+  )(implicit owner: Owner): VModifier = {
     val fieldState                             = Var(encode(state.now()))
     val validationMessage: Var[Option[String]] = Var(None)
 

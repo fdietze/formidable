@@ -12,29 +12,24 @@ case class Person(name: String, age: Int = 5)
 
 sealed trait Pet
 object Pet {
-  case class Dog(name: String, hungry: Boolean) extends Pet
-  case class Cat(name: String, legs: Int = 4)   extends Pet
+  case class Dog(name: String, hungry: Boolean = true) extends Pet
+  case class Cat(name: String, legs: Int = 4)          extends Pet
 }
+
+case class Tree(value: Int, children: Seq[Tree])
 
 sealed trait BinaryTree
 object BinaryTree {
   @formidable.Default
-  case class Leaf(value: String)                         extends BinaryTree
+  case class Leaf(value: Int)                            extends BinaryTree
   case class Branch(left: BinaryTree, right: BinaryTree) extends BinaryTree
 }
 
-sealed trait Tree
-object Tree {
+sealed trait GenericLinkedList[+T]
+object GenericLinkedList {
+  case class Cons[+T](head: T, tail: GenericLinkedList[T]) extends GenericLinkedList[T]
   @formidable.Default
-  case object Leaf                                    extends Tree
-  case class Node(value: String, children: Seq[Tree]) extends Tree
-}
-
-sealed trait GenericList[+T]
-object GenericTree {
-  @formidable.Default
-  case object Nil                                    extends GenericList[Nothing]
-  case class Cons[+T](head: T, tail: GenericList[T]) extends GenericList[T]
+  case object Nil extends GenericLinkedList[Nothing]
 }
 
 object Main {
@@ -46,21 +41,21 @@ object Main {
     // needed for recursion with Scala 3 (https://github.com/softwaremill/magnolia#limitations)
 //    implicit def binaryTreeInstance: Form[BinaryTree]           = Form.derived
 //    implicit def treeInstance: Form[Tree]                       = Form.derived
-//    implicit def genericListInstance: Form[GenericList[String]] = Form.derived
+//    implicit def genericListInstance: Form[GenericLinkedList[String]] = Form.derived
 
     div(
-      formFrame[String]("string"),
-      formFrame[Int]("int"),
-      formFrame[Double]("double"),
-      formFrame[Long]("long"),
-      formFrame[Boolean]("boolean"),
-      formFrame[Option[Int]]("option-int"),
-      formFrame[Seq[Int]]("seq-int"),
-      formFrame[Person]("person"),
-      formFrame[Pet]("pet"),
-      formFrame[BinaryTree]("binarytree"),
-      formFrame[Tree]("tree"),
-      formFrame[GenericList[String]]("generic-list"),
+      formFrame[String]("String"),
+      formFrame[Int]("Int"),
+      formFrame[Double]("Double"),
+      formFrame[Long]("Long"),
+      formFrame[Boolean]("Boolean"),
+      formFrame[Option[Int]]("Option[Int]"),
+      formFrame[Seq[Int]]("Seq[Int]"),
+      formFrame[Person]("Person"),
+      formFrame[Pet]("Pet"),
+      formFrame[Tree]("Tree"),
+      formFrame[BinaryTree]("BinaryTree"),
+      formFrame[GenericLinkedList[Pet]]("GenericLinkedList[Pet]"),
     )
   }
 
@@ -73,7 +68,7 @@ object Main {
       border       := "1px solid black",
       div(i(name)),
       Form[T].apply(state),
-      div(cls := "value", "value: ", state.map(_.toString)),
+      div("value: ", span(cls := "value", state.map(_.toString))),
     ): VModifier
   }
 }

@@ -19,7 +19,7 @@ trait FormDerivation {
   def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
     def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    def apply(state: Var[T], config: FormConfig)(implicit owner: Owner): VModifier = {
+    def apply(state: Var[T], config: FormConfig): VModifier = Owned {
       val subStates: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
@@ -28,13 +28,12 @@ trait FormDerivation {
           ctx.parameters
             .zip(subStates)
             .map { case (param, subState) =>
-//              println("casting 1")
-              val subForm = (param.typeclass.apply _).asInstanceOf[(Var[Any], FormConfig) => VModifier]
-//              println("casting 1 done")
+              val subForm = ((s: Var[param.PType], c) => param.typeclass.apply(s, c))
+                .asInstanceOf[(Var[Any], FormConfig) => VModifier]
               param.label -> subForm(subState, config)
             },
         )
-      }
+      }: VModifier
     }
   }
 
@@ -43,7 +42,7 @@ trait FormDerivation {
       val defaultSubtype = ctx.subtypes.find(_.annotations.exists(_.isInstanceOf[Default])).getOrElse(ctx.subtypes.head)
       defaultSubtype.typeclass.default
     }
-    override def apply(state: Var[T], config: FormConfig)(implicit owner: Owner): VModifier = {
+    override def apply(state: Var[T], config: FormConfig): VModifier = Owned {
       val labelToSubtype =
         ctx.subtypes.view.map { sub => sub.typeName.short -> sub }.toMap
 
@@ -58,17 +57,11 @@ trait FormDerivation {
           onChange.value.map(label => labelToSubtype(label).typeclass.default) --> state,
         ),
         state.map { value =>
-          println(s"casting 2 ${ctx.typeName}")
-          val r = ctx.split(value) { sub =>
-            println(s"  c2: ${sub.typeName.full} ${value.asInstanceOf[T].getClass.getName}")
-            println(s"  c2: ${sub.typeclass.asInstanceOf[Form[T]].getClass.getName} ")
-            println(s"  c2: ${value} ")
+          ctx.split(value) { sub =>
             VModifier.ifTrue(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]](state, config))
           }
-          println("casting 2 done")
-          r
         },
-      )
+      ): VModifier
     }
 
   }

@@ -6,11 +6,11 @@ import outwatch._
 case class Default() extends scala.annotation.StaticAnnotation
 
 trait Form[T] {
+  def default: T
   def apply(
     state: Var[T],
     config: FormConfig = FormConfig.default,
-  )(implicit owner: Owner): VModifier
-  def default: T
+  ): VModifier
 }
 
 object Form extends FormDerivation
