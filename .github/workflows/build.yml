@@ -52,7 +52,7 @@ jobs:
         run: |
           # Runner has 7G of RAM, so 4G for sbt is ok here:
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-          ENABLE_FATAL_WARNINGS=true sbt --mem 4096 scalafmtCheck scalafmtSbtCheck "++${{matrix.scalaVersion}} ;compile ;demo/fastOptJS/webpack"
+          ENABLE_FATAL_WARNINGS=true sbt --mem 4096 ++${{matrix.scalaVersion}} compile demo/fastOptJS/webpack scalafmtCheck scalafmtSbtCheck
 
       - name: Prepare devserver to run End-to-End UI Tests
         run: |

@@ -36,7 +36,7 @@ val isScala3 = Def.setting(CrossVersion.partialVersion(scalaVersion.value).exist
 
 lazy val commonSettings = Seq(
   // overwrite scalacOptions "-Xfatal-warnings" from https://github.com/DavidGregory084/sbt-tpolecat
-  if (enableFatalWarnings) scalacOptions += "-Xfatal-warnings" else scalacOptions -= "-Xfatal-warnings",
+  scalacOptions --= (if (enableFatalWarnings) Nil else Seq("-Xfatal-warnings")),
   scalacOptions ++= (if (isScala3.value) Nil
                      else Seq("-Vimplicits", "-Vtype-diffs")), // better error messages for implicit resolution
   scalacOptions ++= (if (isScala3.value) Seq("-Yretain-trees") else Nil), // recursive data structures with Scala 3
