@@ -52,6 +52,7 @@ object Main {
       formFrame[Boolean]("Boolean"),
       formFrame[Option[Int]]("Option[Int]"),
       formFrame[Seq[Int]]("Seq[Int]"),
+      formFrame[(Int, String, Option[Long])]("Tuple"),
       formFrame[Person]("Person"),
       formFrame[Pet]("Pet"),
       formFrame[Tree]("Tree"),

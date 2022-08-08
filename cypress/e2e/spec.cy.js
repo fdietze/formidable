@@ -79,6 +79,18 @@ describe('empty spec', () => {
     })
   })
 
+  it('Tuple', () => {
+    cy.get('.Tuple').within(($form) => {
+      cy.contains('tr', '_1:').find('input[type="text"]').clear().type('8')
+      cy.get('.value').should('have.text', '(8,,None)')
+      cy.contains('tr', '_2:').find('input[type="text"]').clear().type('Wurst')
+      cy.get('.value').should('have.text', '(8,Wurst,None)')
+      cy.contains('tr', '_3:').get('input[type="checkbox"]').check()
+      cy.contains('tr', '_3:').get('input[type="text"]').clear().type('17')
+      cy.get('.value').should('have.text', '(8,Wurst,Some(17))')
+    })
+  })
+
   it('Person (case class)', () => {
     cy.get('.Person').within(($form) => {
       cy.contains('tr', 'name:').find('input[type="text"]').clear().type('Klaus')

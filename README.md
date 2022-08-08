@@ -7,6 +7,7 @@ Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala)
 - `Option[T]`
 - `Seq[T]`
 - sealed traits
+- tuples
 - case classes
 - recursive types
 - generic types
