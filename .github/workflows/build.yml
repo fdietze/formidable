@@ -46,14 +46,13 @@ jobs:
         run: |
           # Runner has 7G of RAM, so 4G for sbt is ok here:
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-          sbt --mem 4096 scalafmtCheck scalafmtSbtCheck "++${{matrix.scalaVersion}} compile"
+          ENABLE_FATAL_WARNINGS=true sbt --mem 4096 scalafmtCheck scalafmtSbtCheck "++${{matrix.scalaVersion}} ;compile ;demo/fastOptJS/webpack"
 
       - name: Prepare devserver to run End-to-End UI Tests
         run: |
           # Start frontend dev-webserver
-          # (ENABLE_FATAL_WARNINGS=true sbt webapp/fastOptJS/startWebpackDevServer shell || kill 0) &
           (
-            cd webapp/target/scala-2.13/scalajs-bundler/main
+            cd demo/target/scala-2.13/scalajs-bundler/main
             node node_modules/.bin/webpack-dev-server --bail --port 12345 --config  webpack.config.dev.js || kill 0
           ) &
 
