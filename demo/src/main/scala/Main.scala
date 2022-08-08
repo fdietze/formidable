@@ -16,7 +16,7 @@ object Pet {
   case class Cat(name: String, legs: Int = 4)          extends Pet
 }
 
-case class Tree(value: Int, children: Seq[Tree])
+case class Tree(value: Int = 2, children: Seq[Tree])
 
 sealed trait BinaryTree
 object BinaryTree {
