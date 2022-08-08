@@ -1,10 +1,16 @@
 name: Test
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
   pull_request:
+    types: [ opened, synchronize ]
   workflow_dispatch:
+
+# automatically cancel previous runs on the same PR
+# https://stackoverflow.com/questions/66335225/how-to-cancel-previous-runs-in-the-pr-when-you-push-new-commitsupdate-the-curre/67939898#67939898
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   build:
