@@ -1,10 +1,20 @@
 # Formidable
 
-A typeclass for HTML forms, with automatic derivation in [Outwatch](github.com/outwatch/outwatch).
+Generates reactive HTML forms directly from type definitions. These forms can used with [Outwatch](github.com/outwatch/outwatch).
 
-Currently only working with `Scala 3` and not released yet.
+It defines a typeclass `Form[T]` with many useful instances:
+- Primitives: `Int`, `Double`, `Long`, `String`, `Boolean`
+- `Option[T]`
+- `Seq[T]`
+- sealed traits
+- case classes
+- recursive types
+- generic types
 
-Publish the library locally:
+Automatic derivation is done using [Magnolia](https://github.com/softwaremill/magnolia).
+
+
+To publish the library locally:
 
 ```bash
 sbt publishLocal
@@ -17,26 +27,17 @@ libraryDependencies += "com.github.fdietze" %%% "formidable" % "0.1.0-SNAPSHOT"
 
 
 ```scala
-import formidable.{given, *}
+import formidable._
+import formidable.instances._
 
 case class Person(name: String, age: Option[Int])
 
 val state = Form.state[Person]
 
 div(
-  Form[Person](state),
+  Form[Person].apply(state),
   div(state.map(_.toString)),
 )
 ```
 
 
-Automatically derive outwatch forms for:
-- Primitives: `Int`, `String`, `Boolean`
-- `Option[T]`
-- `Seq[T]`
-- sealed traits
-- case classes
-
-TODO:
-- recursive case classes (Leaf/Node tree)
-- Any `Seq[T]`, like `Vector[T]`

@@ -4,9 +4,9 @@ import outwatch._
 import outwatch.dsl._
 import cats.effect.SyncIO
 import colibri.reactive._
+
 import formidable._
 import formidable.instances._
-import formidable.Form._
 
 case class Person(name: String, age: Int = 5)
 
