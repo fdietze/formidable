@@ -23,3 +23,31 @@ pull_request_rules:
       queue:
         name: default
         method: squash
+
+
+  - name: Merge PRs (rebase) which are ready to merge
+    conditions:
+      - label=ready-to-merge-rebase
+      - base=main
+      - check-success~=build \(2.13.\d+\)
+      - check-success~=build \(3.1.\d+\)
+      - "#review-requested=0"
+      - "#changes-requested-reviews-by=0"
+    actions:
+      queue:
+        name: default
+        method: rebase
+
+
+  - name: Merge PRs (squash) which are ready to merge
+    conditions:
+      - label=ready-to-merge-squash
+      - base=main
+      - check-success~=build \(2.13.\d+\)
+      - check-success~=build \(3.1.\d+\)
+      - "#review-requested=0"
+      - "#changes-requested-reviews-by=0"
+    actions:
+      queue:
+        name: default
+        method: squash
