@@ -13,7 +13,7 @@ It defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala) with ma
 
 Automatic derivation is done using [Magnolia](https://github.com/softwaremill/magnolia).
 
-The Scala 2 support is very good, the Scala 3 support works but is a bit [limited](https://github.com/softwaremill/magnolia/issues/296).
+The Scala 2 support is very well, the Scala 3 support works but is a bit [limited](https://github.com/softwaremill/magnolia/issues/296).
 
 To publish the library locally:
 
