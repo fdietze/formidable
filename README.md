@@ -1,8 +1,8 @@
 # Formidable
 
-Generates reactive HTML forms directly from type definitions. These forms can used with ScalaJS and [Outwatch](github.com/outwatch/outwatch).
+Generates reactive HTML forms directly from type definitions. These forms can used with ScalaJS and [Outwatch](github.com/outwatch/outwatch). Scala 2.13 and 3 are supported.
 
-It defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala) with many useful instances:
+Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala) with many default instances:
 - Primitives: `Int`, `Double`, `Long`, `String`, `Boolean`
 - `Option[T]`
 - `Seq[T]`
@@ -12,8 +12,6 @@ It defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala) with ma
 - generic types
 
 Automatic derivation is done using [Magnolia](https://github.com/softwaremill/magnolia).
-
-The Scala 2 support is very well, the Scala 3 support works but is a bit [limited](https://github.com/softwaremill/magnolia/issues/296).
 
 To publish the library locally:
 

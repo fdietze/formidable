@@ -13,7 +13,8 @@ case class Person(name: String, age: Int = 5)
 sealed trait Pet
 object Pet {
   case class Dog(name: String, hungry: Boolean = true) extends Pet
-  case class Cat(name: String, legs: Int = 4)          extends Pet
+  @formidable.Default
+  case class Cat(name: String, legs: Int = 4) extends Pet
 }
 
 case class Tree(value: Int = 2, children: Seq[Tree])
@@ -39,9 +40,9 @@ object Main {
 
   def app: VNode = {
     // needed for recursion with Scala 3 (https://github.com/softwaremill/magnolia#limitations)
-//    implicit def binaryTreeInstance: Form[BinaryTree]           = Form.derived
-//    implicit def treeInstance: Form[Tree]                       = Form.derived
-//    implicit def genericListInstance: Form[GenericLinkedList[String]] = Form.derived
+    implicit def treeInstance: Form[Tree]                          = Form.derived
+    implicit def binaryTreeInstance: Form[BinaryTree]              = Form.derived
+    implicit def genericListInstance: Form[GenericLinkedList[Pet]] = Form.derived
 
     div(
       formFrame[String]("String"),

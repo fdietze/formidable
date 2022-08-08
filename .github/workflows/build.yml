@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        scalaVersion: ["2.13.8"]
+        scalaVersion: ["2.13.8", "3.1.3"]
     runs-on: ubuntu-22.04
 
     steps:
@@ -52,7 +52,7 @@ jobs:
         run: |
           # Start frontend dev-webserver
           (
-            cd demo/target/scala-2.13/scalajs-bundler/main
+            cd demo/target/${{matrix.scalaVersion}}/scalajs-bundler/main
             node node_modules/.bin/webpack-dev-server --bail --port 12345 --config  webpack.config.dev.js || kill 0
           ) &
 
@@ -60,12 +60,12 @@ jobs:
         uses: cypress-io/github-action@v4.2.0
 
       - name: Build production assets
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
         run: |
           sbt prod
 
       - name: Deploy to Github Pages
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
         uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
           branch: gh-pages # The branch the action should deploy to.

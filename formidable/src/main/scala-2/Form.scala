@@ -6,9 +6,6 @@ import colibri.reactive._
 
 import magnolia1._
 
-// TODO: recursive case classes
-// https://github.com/softwaremill/magnolia#limitations
-
 trait FormDerivation {
   def apply[A](implicit instance: Form[A]): Form[A] = instance
   def state[A](implicit instance: Form[A]): Var[A]  = Var(instance.default)
@@ -16,9 +13,9 @@ trait FormDerivation {
   type Typeclass[T] = Form[T]
 
   def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
-    def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
+    override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    def apply(state: Var[T], config: FormConfig): VModifier = Owned {
+    override def apply(state: Var[T], config: FormConfig): VModifier = Owned {
       val subStates: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 

@@ -2,46 +2,40 @@ package formidable
 
 import outwatch._
 import outwatch.dsl._
-import colibri._
 import colibri.reactive._
-import org.scalajs.dom.console
-import org.scalajs.dom.HTMLInputElement
 
-import scala.deriving.Mirror
-import scala.deriving._
-import scala.compiletime.{constValueTuple, erasedValue, summonInline}
-import magnolia1.*
-
-// TODO: recursive case classes
-// https://github.com/softwaremill/magnolia#limitations
+import magnolia1._
 
 trait FormDerivation extends AutoDerivation[Form] {
   def apply[A](implicit instance: Form[A]): Form[A] = instance
   def state[A](implicit instance: Form[A]): Var[A]  = Var(instance.default)
 
-  def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
-    def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
+  override def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
+    override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    override def apply(state: Var[T], config: FormConfig)(using Owner): VModifier = {
-      val subStates:Var[Seq[Any]] = state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
+    override def apply(state: Var[T], config: FormConfig): VModifier = Owned {
+      val subStates: Var[Seq[Any]] =
+        state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
       subStates.sequence.map { subStates =>
         config.labeledFormGroup(
-        ctx.params
+          ctx.params
             .zip(subStates)
             .map { case (param, subState) =>
-              val subForm = (param.typeclass.apply _).asInstanceOf[((Var[Any], FormConfig) => VModifier)]
+              val subForm = (param.typeclass.apply _).asInstanceOf[(Var[Any], FormConfig) => VModifier]
               param.label -> subForm(subState, config)
-            }
+            },
         )
-      }
+      }: VModifier
     }
   }
 
-
-  override def split[T](ctx: SealedTrait[Form, T]):Form[T] = new Form[T] {
-    override def default: T = ctx.subtypes.head.typeclass.default
-    override def apply(state: Var[T], config: FormConfig)(using Owner): VModifier = {
+  override def split[T](ctx: SealedTrait[Form, T]): Form[T] = new Form[T] {
+    override def default: T = {
+      val defaultSubtype = ctx.subtypes.find(_.annotations.exists(_.isInstanceOf[Default])).getOrElse(ctx.subtypes.head)
+      defaultSubtype.typeclass.default
+    }
+    override def apply(state: Var[T], config: FormConfig): VModifier = Owned {
       val labelToSubtype =
         ctx.subtypes.view.map { sub => sub.typeInfo.short -> sub }.toMap
 
@@ -50,15 +44,17 @@ trait FormDerivation extends AutoDerivation[Form] {
           ctx.subtypes.map { subtype =>
             option(
               subtype.typeInfo.short,
-              selected <-- state.map(value => ctx.choose(value)(_ == subtype)),
+              selected <-- state.map(value => ctx.choose(value)(_.subtype == subtype)),
             )
           }.toSeq,
           onChange.value.map(label => labelToSubtype(label).typeclass.default) --> state,
         ),
         state.map { value =>
-          ctx.choose(value)(sub => sub.typeclass.asInstanceOf[Form[T]](state, config))
+          ctx.choose(value) { sub =>
+            VModifier.ifTrue(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]](state, config))
+          }
         },
-      )
+      ): VModifier
     }
 
   }
