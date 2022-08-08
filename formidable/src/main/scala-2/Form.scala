@@ -3,7 +3,6 @@ package formidable
 import outwatch._
 import outwatch.dsl._
 import colibri.reactive._
-import language.experimental.macros
 
 import magnolia1._
 
