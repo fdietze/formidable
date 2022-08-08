@@ -44,3 +44,5 @@ bin/
 #general
 *.class
 /node_modules
+cypress/screenshots
+cypress/videos
