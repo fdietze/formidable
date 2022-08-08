@@ -55,10 +55,20 @@ jobs:
           ENABLE_FATAL_WARNINGS=true sbt --mem 4096 ++${{matrix.scalaVersion}} compile demo/fastOptJS/webpack scalafmtCheck scalafmtSbtCheck
 
       - name: Prepare devserver to run End-to-End UI Tests
+        if: startsWith(matrix.scalaVersion, '3.')
         run: |
           # Start frontend dev-webserver
           (
-            cd demo/target/scala-${{matrix.scalaVersion}}/scalajs-bundler/main
+            cd demo/target/scala-${{matrix.scalaVersion}}/scalajs-bundler/main || kill 0
+            node node_modules/.bin/webpack-dev-server --bail --port 12345 --config  webpack.config.dev.js || kill 0
+          ) &
+
+      - name: Prepare devserver to run End-to-End UI Tests
+        if: startsWith(matrix.scalaVersion, '2.13.')
+        run: |
+          # Start frontend dev-webserver
+          (
+            cd demo/target/scala-2.13/scalajs-bundler/main || kill 0
             node node_modules/.bin/webpack-dev-server --bail --port 12345 --config  webpack.config.dev.js || kill 0
           ) &
 
