@@ -8,8 +8,7 @@ queue_rules:
 pull_request_rules:
   - name: Label Scala Steward PRs
     conditions:
-      - or:
-        - author=scala-steward
+      - author=scala-steward
     actions:
       label:
         add: [dependencies, scala]
