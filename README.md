@@ -14,18 +14,6 @@ Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala)
 
 Automatic derivation is done using [Magnolia](https://github.com/softwaremill/magnolia).
 
-To publish the library locally:
-
-```bash
-sbt +publishLocal
-```
-
-Then include it in the `build.sbt` of a local project:
-```scala
-libraryDependencies += "com.github.fdietze" %%% "formidable" % "0.1.0-SNAPSHOT"
-```
-
-
 ```scala
 import formidable._
 import formidable.instances._
