@@ -6,7 +6,6 @@ import cats.effect.SyncIO
 import colibri.reactive._
 
 import formidable._
-import formidable.instances._
 
 case class Person(name: String, age: Int = 5)
 

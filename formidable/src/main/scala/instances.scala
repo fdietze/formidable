@@ -1,11 +1,9 @@
-package formidable
-
 import colibri.reactive._
 import outwatch._
 
 // TODO: List, Vector instead of only Seq
 
-package object instances {
+package object formidable {
 
   implicit val stringForm: Form[String] = new Form[String] {
     def default = ""
