@@ -5,7 +5,7 @@ Generates reactive HTML forms directly from type definitions. These forms can be
 Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala) with many default instances:
 - Primitives: `Int`, `Double`, `Long`, `String`, `Boolean`
 - `Option[T]`
-- `Seq[T]`
+- `Seq[T]`, `Vector[T]`, `List[T]`
 - sealed traits
 - tuples
 - case classes
