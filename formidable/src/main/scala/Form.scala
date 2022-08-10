@@ -12,6 +12,14 @@ trait Form[T] {
     state: Var[T] = Var(default),
     config: FormConfig = FormConfig.default,
   ): VModifier
+
+  def imap[S](f: T => S)(g: S => T): Form[S] = new Form[S] {
+    override def default: S = f(Form.this.default)
+    override def render(
+      state: Var[S],
+      config: FormConfig,
+    ): VModifier = Owned { Form.this.render(state.imap(f)(g), config) }
+  }
 }
 
 object Form extends FormDerivation

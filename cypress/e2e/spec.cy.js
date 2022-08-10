@@ -1,4 +1,4 @@
-describe('empty spec', () => {
+describe('Form interactions', () => {
   it('Load demo', () => {
     cy.visit('http://localhost:12345')
   })
@@ -61,6 +61,46 @@ describe('empty spec', () => {
 
   it('Seq[Int]', () => {
     cy.get('.Seq\\[Int\\]').within(($form) => {
+      cy.contains('button','add').click()
+      cy.get('.value').should('have.text', 'List(0)')
+      cy.get('> div:nth-child(2) > div:nth-child(1) input[type="text"]').clear().type('13')
+      cy.get('.value').should('have.text', 'List(13)')
+      cy.contains('button','add').click()
+      cy.get('> div:nth-child(2) > div:nth-child(2) input[type="text"]').clear().type('4')
+      cy.get('.value').should('have.text', 'List(13, 4)')
+      cy.get('> div:nth-child(2) > div:nth-child(1) input[type="text"]').clear().type('14')
+      cy.get('> div:nth-child(2) > div:nth-child(2) input[type="text"]').clear().type('5')
+      cy.get('.value').should('have.text', 'List(14, 5)')
+      cy.get('> div:nth-child(2) > div:nth-child(2) input[type="text"]').clear().type('5')
+      cy.get('> div:nth-child(2) > div:nth-child(1)').contains('button', 'remove').click()
+      cy.get('.value').should('have.text', 'List(5)')
+      cy.get('> div:nth-child(2) > div:nth-child(1)').contains('button', 'remove').click()
+      cy.get('.value').should('have.text', 'List()')
+    })
+  })
+
+  it('Vector[Int]', () => {
+    cy.get('.Vector\\[Int\\]').within(($form) => {
+      cy.contains('button','add').click()
+      cy.get('.value').should('have.text', 'Vector(0)')
+      cy.get('> div:nth-child(2) > div:nth-child(1) input[type="text"]').clear().type('13')
+      cy.get('.value').should('have.text', 'Vector(13)')
+      cy.contains('button','add').click()
+      cy.get('> div:nth-child(2) > div:nth-child(2) input[type="text"]').clear().type('4')
+      cy.get('.value').should('have.text', 'Vector(13, 4)')
+      cy.get('> div:nth-child(2) > div:nth-child(1) input[type="text"]').clear().type('14')
+      cy.get('> div:nth-child(2) > div:nth-child(2) input[type="text"]').clear().type('5')
+      cy.get('.value').should('have.text', 'Vector(14, 5)')
+      cy.get('> div:nth-child(2) > div:nth-child(2) input[type="text"]').clear().type('5')
+      cy.get('> div:nth-child(2) > div:nth-child(1)').contains('button', 'remove').click()
+      cy.get('.value').should('have.text', 'Vector(5)')
+      cy.get('> div:nth-child(2) > div:nth-child(1)').contains('button', 'remove').click()
+      cy.get('.value').should('have.text', 'Vector()')
+    })
+  })
+
+  it('List[Int]', () => {
+    cy.get('.List\\[Int\\]').within(($form) => {
       cy.contains('button','add').click()
       cy.get('.value').should('have.text', 'List(0)')
       cy.get('> div:nth-child(2) > div:nth-child(1) input[type="text"]').clear().type('13')

@@ -91,6 +91,9 @@ package object formidable {
     }
   }
 
+  implicit def vectorForm[T](implicit seqForm: Form[Seq[T]]): Form[Vector[T]] = seqForm.imap(_.toVector)(_.toSeq)
+  implicit def listForm[T](implicit seqForm: Form[Seq[T]]): Form[List[T]]     = seqForm.imap(_.toList)(_.toSeq)
+
   private def encodedTextInput[T](
     state: Var[T],
     encode: T => String,
