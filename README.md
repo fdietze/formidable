@@ -15,8 +15,11 @@ Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala)
 Automatic derivation is done using [Magnolia](https://github.com/softwaremill/magnolia).
 
 ```scala
+import outwatch._
+import outwatch.dsl._
+import colibri.reactive._
+
 import formidable._
-import formidable.instances._
 
 case class Person(name: String, age: Option[Int])
 
