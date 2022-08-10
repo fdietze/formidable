@@ -20,10 +20,10 @@ import formidable.instances._
 
 case class Person(name: String, age: Option[Int])
 
-val state = Form.state[Person]
+val state:Var[Person] = Form.state[Person]
 
 div(
-  Form[Person].apply(state),
+  Form[Person].render(state),
   div(state.map(_.toString)),
 )
 ```

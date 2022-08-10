@@ -15,7 +15,7 @@ trait FormDerivation {
   def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
     override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    override def apply(state: Var[T], config: FormConfig): VModifier = Owned {
+    override def render(state: Var[T], config: FormConfig): VModifier = Owned {
       val subStates: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
@@ -24,7 +24,7 @@ trait FormDerivation {
           ctx.parameters
             .zip(subStates)
             .map { case (param, subState) =>
-              val subForm = ((s: Var[param.PType], c) => param.typeclass.apply(s, c))
+              val subForm = ((s: Var[param.PType], c) => param.typeclass.render(s, c))
                 .asInstanceOf[(Var[Any], FormConfig) => VModifier]
               param.label -> subForm(subState, config)
             },
@@ -38,7 +38,7 @@ trait FormDerivation {
       val defaultSubtype = ctx.subtypes.find(_.annotations.exists(_.isInstanceOf[Default])).getOrElse(ctx.subtypes.head)
       defaultSubtype.typeclass.default
     }
-    override def apply(state: Var[T], config: FormConfig): VModifier = Owned {
+    override def render(state: Var[T], config: FormConfig): VModifier = Owned {
       val labelToSubtype =
         ctx.subtypes.view.map { sub => sub.typeName.short -> sub }.toMap
 
@@ -54,7 +54,7 @@ trait FormDerivation {
         ),
         state.map { value =>
           ctx.split(value) { sub =>
-            VModifier.ifTrue(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]](state, config))
+            VModifier.ifTrue(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(state, config))
           }
         },
       ): VModifier

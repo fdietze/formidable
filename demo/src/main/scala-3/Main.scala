@@ -69,7 +69,7 @@ object Main {
       padding      := "5px",
       border       := "1px solid black",
       div(i(name)),
-      Form[T].apply(state),
+      Form[T].render(state),
       div("value: ", span(cls := "value", state.map(_.toString))),
     ): VModifier
   }
