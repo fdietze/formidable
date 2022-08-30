@@ -20,8 +20,7 @@ ThisBuild / resolvers ++= Seq(
 
 lazy val scalaJsMacrotaskExecutor = Seq(
   // https://github.com/scala-js/scala-js-macrotask-executor
-  libraryDependencies       += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.0",
-  Compile / npmDependencies += "setimmediate"  -> "1.0.5", // polyfill
+  libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.0",
 )
 
 def readJsDependencies(baseDirectory: File, field: String): Seq[(String, String)] = {
