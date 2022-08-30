@@ -7,7 +7,7 @@ ThisBuild / scalaVersion       := "2.13.8"
 
 val versions = new {
   val outwatch  = "1.0.0-RC8"
-  val colibri   = "0.6.1"
+  val colibri   = "0.7.0"
   val funPack   = "0.2.0"
   val scalaTest = "3.2.12"
 }
@@ -20,7 +20,7 @@ ThisBuild / resolvers ++= Seq(
 
 lazy val scalaJsMacrotaskExecutor = Seq(
   // https://github.com/scala-js/scala-js-macrotask-executor
-  libraryDependencies       += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.0.0",
+  libraryDependencies       += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.0",
   Compile / npmDependencies += "setimmediate"  -> "1.0.5", // polyfill
 )
 
@@ -55,7 +55,7 @@ lazy val formidable = project
       "com.github.cornerman" %%% "colibri"          % versions.colibri,
       "com.github.cornerman" %%% "colibri-reactive" % versions.colibri,
     ) ++
-      (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.1.4")
+      (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.1.5")
        else
          Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.2", "org.scala-lang" % "scala-reflect" % "2.13.8")),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
