@@ -2,7 +2,7 @@ Global / onChangedBuildSource := IgnoreSourceChanges // not working well with we
 
 name                           := "Formidable"
 ThisBuild / organization       := "com.github.fdietze"
-ThisBuild / crossScalaVersions := Seq("2.13.8", "3.1.3")
+ThisBuild / crossScalaVersions := Seq("2.13.8", "3.2.0")
 ThisBuild / scalaVersion       := "2.13.8"
 
 val versions = new {
