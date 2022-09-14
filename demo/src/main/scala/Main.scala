@@ -25,14 +25,27 @@ object BinaryTree {
   case class Branch(left: BinaryTree, right: BinaryTree) extends BinaryTree
 }
 
-sealed trait GenericLinkedList[+T]
+sealed trait GenericLinkedList[+T] {
+  def toList: List[T]
+}
 object GenericLinkedList {
-  case class Cons[+T](head: T, tail: GenericLinkedList[T]) extends GenericLinkedList[T]
+  def from[T](list: List[T]): GenericLinkedList[T] = {
+    list.foldLeft[GenericLinkedList[T]](GenericLinkedList.Nil)((agg, next) => Cons(next, agg))
+  }
+  case class Cons[+T](head: T, tail: GenericLinkedList[T]) extends GenericLinkedList[T] {
+    def toList = head :: tail.toList
+  }
+
   @formidable.Default
-  case object Nil extends GenericLinkedList[Nothing]
+  case object Nil extends GenericLinkedList[Nothing] {
+    def toList = List()
+  }
 }
 
 object Main extends Extras {
+
+  implicit def genlist[T](implicit listForm: Form[List[T]]): Form[GenericLinkedList[T]] =
+    listForm.imap(GenericLinkedList.from)(_.toList)
 
   def main(args: Array[String]): Unit =
     Outwatch.renderInto[SyncIO]("#app", app).unsafeRunSync()
