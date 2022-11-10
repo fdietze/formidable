@@ -54,7 +54,7 @@ trait FormDerivation {
         ),
         state.map { value =>
           ctx.split(value) { sub =>
-            VModifier.ifTrue(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(state, config))
+            VModifier.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(state, config))
           }
         },
       ): VModifier
