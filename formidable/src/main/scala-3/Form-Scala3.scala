@@ -51,7 +51,7 @@ trait FormDerivation extends AutoDerivation[Form] {
         ),
         state.map { value =>
           ctx.choose(value) { sub =>
-            VModifier.ifTrue(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(state, config))
+            VModifier.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(state, config))
           }
         },
       ): VModifier
