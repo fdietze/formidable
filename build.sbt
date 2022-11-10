@@ -2,12 +2,12 @@ Global / onChangedBuildSource := IgnoreSourceChanges // not working well with we
 
 name                           := "Formidable"
 ThisBuild / organization       := "com.github.fdietze"
-ThisBuild / crossScalaVersions := Seq("2.13.8", "3.2.0")
+ThisBuild / crossScalaVersions := Seq("2.13.8", "3.2.1")
 ThisBuild / scalaVersion       := "2.13.8"
 
 val versions = new {
   val outwatch  = "1.0.0-RC10"
-  val colibri   = "0.7.4"
+  val colibri   = "0.7.6"
   val funPack   = "0.2.0"
   val scalaTest = "3.2.12"
 }
