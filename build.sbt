@@ -87,8 +87,6 @@ lazy val demo = project
     )), // configure Scala.js to emit a JavaScript module instead of a top-level script
     scalaJSUseMainModuleInitializer   := true, // On Startup, call the main function
     webpackDevServerPort              := 12345,
-    webpack / version                 := "4.46.0",
-    startWebpackDevServer / version   := "3.11.3",
     webpackDevServerExtraArgs         := Seq("--color"),
     fullOptJS / webpackEmitSourceMaps := true,
     fastOptJS / webpackBundlingMode := BundlingMode
