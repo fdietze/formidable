@@ -87,6 +87,7 @@ lazy val demo = project
   .dependsOn(formidable)
   .settings(commonSettings, scalaJsMacrotaskExecutor)
   .settings(
+    publish / skip := true,
     libraryDependencies ++= Seq(
       "io.github.outwatch" %%% "outwatch" % versions.outwatch,
     ),
