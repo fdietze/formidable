@@ -21,38 +21,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: coursier/cache-action@v6
-      - uses: olafurpg/setup-scala@v13
+      - uses: coursier/setup-action@v1
         with:
-          java-version: openjdk@1.17
+          jvm: adoptium:1.17
+          apps: sbt metals
 
-      # https://github.com/actions/cache/blob/master/examples.md#node---yarn
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v3
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      - uses: actions/setup-node@v3
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-
-      - uses: actions/cache@v3
-        name: Cache scalajs-bundler node_modules
-        with:
-          path: "*/target/**/main/node_modules"
-          key: ${{ runner.os }}-scalajsbundler-node_modules-${{ hashFiles('*/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-scalajsbundler-node_modules
-
+          node-version: "16"
+          cache: "yarn"
+          cache-dependency-path: formidable/package.json
 
       - name: Compile
         run: |
-          # Runner has 7G of RAM, so 4G for sbt is ok here:
+          # Runner has 7G of RAM.
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-          ENABLE_FATAL_WARNINGS=true sbt --mem 4096 ++${{matrix.scalaVersion}} compile demo/fastOptJS/webpack scalafmtCheck scalafmtSbtCheck
+          ENABLE_FATAL_WARNINGS=true SBT_OPTS="-XX:MaxHeapSize=6G" sbt ++${{matrix.scalaVersion}} compile demo/fastOptJS/webpack scalafmtCheck scalafmtSbtCheck
 
       - name: Prepare devserver to run End-to-End UI Tests (Scala 3)
         if: startsWith(matrix.scalaVersion, '3.')
@@ -83,6 +69,13 @@ jobs:
       - name: Check if working directory is clean
         run: git diff --quiet --exit-code || (git status && false)
 
+      - name: Check if scala version is compatible with latest metals
+        run: |
+          SCALA_VERSION=$(sed -nr 's/.*scalaVersion\s+:=\s+"(.*)"/\1/p' build.sbt)
+          METALS_SUPPORTED_VERSIONS=$(metals --version)
+          echo "$METALS_SUPPORTED_VERSIONS"
+          metals --version | grep "$SCALA_VERSION" || (echo "Scala $SCALA_VERSION not supported by metals."; false)
+
       - name: Deploy to Github Pages
         if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
         uses: JamesIves/github-pages-deploy-action@v4.4.1
@@ -95,3 +88,37 @@ jobs:
       #   uses: mxschmitt/action-tmate@v3
       #   with:
       #     limit-access-to-actor: true
+
+  publish:
+    needs: [build]
+    # if this is not a pull request, run only on main or tags pushes.
+    # if this is a pull request, run only when 'publish' label is set
+    if: (github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))) || 
+      (github.event_name == 'pull_request' &&  contains(github.event.pull_request.labels.*.name, 'publish'))
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0 # full history with tags
+
+      - uses: coursier/cache-action@v6
+      - uses: coursier/setup-action@v1
+        with:
+          jvm: adoptium:1.17
+          apps: sbt
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+          cache-dependency-path: formidable/package.json
+
+      - uses: olafurpg/setup-gpg@v3
+      - name: Publish
+        run: ENABLE_FATAL_WARNINGS=true SBT_OPTS="-XX:MaxHeapSize=6G" sbt version "git status" ci-release "git status"
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
