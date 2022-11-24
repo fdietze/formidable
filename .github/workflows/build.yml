@@ -37,7 +37,7 @@ jobs:
         run: |
           # Runner has 7G of RAM.
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-          ENABLE_FATAL_WARNINGS=true SBT_OPTS="-XX:MaxHeapSize=6G" ++${{matrix.scalaVersion}} compile demo/fastOptJS/webpack scalafmtCheck scalafmtSbtCheck
+          ENABLE_FATAL_WARNINGS=true SBT_OPTS="-XX:MaxHeapSize=6G" sbt ++${{matrix.scalaVersion}} compile demo/fastOptJS/webpack scalafmtCheck scalafmtSbtCheck
 
       - name: Prepare devserver to run End-to-End UI Tests (Scala 3)
         if: startsWith(matrix.scalaVersion, '3.')
