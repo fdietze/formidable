@@ -5,6 +5,22 @@ ThisBuild / organization       := "com.github.fdietze"
 ThisBuild / crossScalaVersions := Seq("2.13.8", "3.2.1")
 ThisBuild / scalaVersion       := "2.13.8"
 
+inThisBuild(
+  List(
+    organization := "com.github.fdietze",
+    homepage     := Some(url("https://github.com/fdietze/formidable")),
+    licenses     := Seq("MIT License" -> url("https://opensource.org/licenses/MIT")),
+    developers := List(
+      Developer(
+        "fdietze",
+        "Felix Dietze",
+        "mail@felx.me",
+        url("https://github.com/fdietze"),
+      ),
+    ),
+  ),
+)
+
 val versions = new {
   val outwatch  = "1.0.0-RC13"
   val colibri   = "0.7.6"
