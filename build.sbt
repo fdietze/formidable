@@ -6,7 +6,7 @@ ThisBuild / crossScalaVersions := Seq("2.13.8", "3.2.1")
 ThisBuild / scalaVersion       := "2.13.8"
 
 val versions = new {
-  val outwatch  = "1.0.0-RC12"
+  val outwatch  = "1.0.0-RC13"
   val colibri   = "0.7.6"
   val funPack   = "0.2.0"
   val scalaTest = "3.2.12"
