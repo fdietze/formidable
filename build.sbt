@@ -23,7 +23,7 @@ inThisBuild(
 
 val versions = new {
   val outwatch  = "1.0.0-RC13"
-  val colibri   = "0.7.7"
+  val colibri   = "0.7.8"
   val funPack   = "0.2.0"
   val scalaTest = "3.2.12"
 }
