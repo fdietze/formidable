@@ -40,7 +40,7 @@ trait FormDerivation extends AutoDerivation[Form] {
         selectedValue.imap[SealedTrait.SubtypeValue[Form, T, _]](subType => subType.typeclass.default)(value => ctx.choose(value)(identity))
 
       config.unionSubform(
-        config.selectInput[SealedTrait.Subtype[Form, T,_]](
+        config.selectInput[SealedTrait.SubtypeValue[Form, T,_]](
           options = ctx.subtypes,
           selectedValue = selectedSubtype,
           show = subtype => subtype.typeName.short,
