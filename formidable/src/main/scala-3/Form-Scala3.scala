@@ -1,7 +1,6 @@
 package formidable
 
 import outwatch._
-import outwatch.dsl._
 import colibri.reactive._
 
 import magnolia1._
@@ -13,7 +12,7 @@ trait FormDerivation extends AutoDerivation[Form] {
   override def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
     override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    override def render(state: Var[T], config: FormConfig): VModifier = Owned {
+    override def render(state: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
       val subStates: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
@@ -35,26 +34,23 @@ trait FormDerivation extends AutoDerivation[Form] {
       val defaultSubtype = ctx.subtypes.find(_.annotations.exists(_.isInstanceOf[Default])).getOrElse(ctx.subtypes.head)
       defaultSubtype.typeclass.default
     }
-    override def render(state: Var[T], config: FormConfig): VModifier = Owned {
-      val labelToSubtype =
-        ctx.subtypes.view.map { sub => sub.typeInfo.short -> sub }.toMap
+    override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+      
+      val selectedSubtype: Var[Subtype[Form, T]] =
+        selectedValue.imap[Subtype[Form, T]](subType => subType.typeclass.default)(value => ctx.choose(value)(identity))
 
-      div(
-        select(
-          ctx.subtypes.map { subtype =>
-            option(
-              subtype.typeInfo.short,
-              selected <-- state.map(value => ctx.choose(value)(_.subtype == subtype)),
-            )
-          }.toSeq,
-          onChange.value.map(label => labelToSubtype(label).typeclass.default) --> state,
+      config.unionSubform(
+        config.selectInput[Subtype[Form, T]](
+          options = ctx.subtypes,
+          selectedValue = selectedSubtype,
+          show = subtype => subtype.typeName.short,
         ),
-        state.map { value =>
+        selectedValue.map { value =>
           ctx.choose(value) { sub =>
-            VModifier.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(state, config))
+            VModifier.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(selectedValue, config))
           }
         },
-      ): VModifier
+      )
     }
 
   }
