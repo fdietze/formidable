@@ -65,6 +65,22 @@ trait FormConfig {
       validationMessage.map(_.map(msg => div(msg, color.red))),
     ): VModifier
   }
+
+  def selectInput[T](options: Seq[T], selectedValue: Var[T], show: T => String): VModifier = {
+    select(
+      Owned.function { implicit owner =>
+        options.zipWithIndex.map { case (opt, ind) =>
+          option(dsl.value := ind.toString)(
+            show(opt),
+            selectedValue.map(sel => selected := opt == sel),
+          )
+        }
+      },
+      onChange.value.map(index => options(index.toInt)) --> selectedValue,
+    )
+  }
+
+  def unionSubform(selectForm: VModifier, subForm: VModifier) = div(selectForm, subForm)
 }
 object FormConfig {
   val default: FormConfig = new FormConfig {}
