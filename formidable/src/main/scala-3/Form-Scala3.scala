@@ -35,15 +35,17 @@ trait FormDerivation extends AutoDerivation[Form] {
       defaultSubtype.typeclass.default
     }
     override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
-      
-      val selectedSubtype: Var[SealedTrait.SubtypeValue[Form, T, _]] =
-        selectedValue.imap[SealedTrait.SubtypeValue[Form, T, _]](subType => subType.typeclass.default)(value => ctx.choose(value)(identity))
+
+      val selectedSubtype: Var[SealedTrait.Subtype[Form, T, _]] =
+        selectedValue.imap[SealedTrait.Subtype[Form, T, _]](subType => subType.typeclass.default)(value =>
+          ctx.choose(value)(_.subtype),
+        )
 
       config.unionSubform(
-        config.selectInput[SealedTrait.SubtypeValue[Form, T,_]](
+        config.selectInput[SealedTrait.Subtype[Form, T, _]](
           options = ctx.subtypes,
           selectedValue = selectedSubtype,
-          show = subtype => subtype.typeName.short,
+          show = subtype => subtype.typeInfo.short,
         ),
         selectedValue.map { value =>
           ctx.choose(value) { sub =>
