@@ -16,9 +16,9 @@ inThisBuild(
         "Felix Dietze",
         "mail@felx.me",
         url("https://github.com/fdietze"),
-      ),
+      )
     ),
-  ),
+  )
 )
 
 val versions = new {
@@ -36,7 +36,7 @@ ThisBuild / resolvers ++= Seq(
 
 lazy val scalaJsMacrotaskExecutor = Seq(
   // https://github.com/scala-js/scala-js-macrotask-executor
-  libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.0",
+  libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.0"
 )
 
 def readJsDependencies(baseDirectory: File, field: String): Seq[(String, String)] = {
@@ -89,18 +89,18 @@ lazy val demo = project
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
-      "io.github.outwatch" %%% "outwatch" % versions.outwatch,
+      "io.github.outwatch" %%% "outwatch" % versions.outwatch
     ),
     Compile / npmDevDependencies ++= Seq(
-      "@fun-stack/fun-pack" -> versions.funPack, // sane defaults for webpack development and production, see webpack.config.*.js
+      "@fun-stack/fun-pack" -> versions.funPack // sane defaults for webpack development and production, see webpack.config.*.js
     ),
     scalacOptions --= Seq(
-      "-Xfatal-warnings",
+      "-Xfatal-warnings"
     ), // overwrite option from https://github.com/DavidGregory084/sbt-tpolecat
 
     useYarn := true, // Makes scalajs-bundler use yarn instead of npm
     scalaJSLinkerConfig ~= (_.withModuleKind(
-      ModuleKind.CommonJSModule,
+      ModuleKind.CommonJSModule
     )), // configure Scala.js to emit a JavaScript module instead of a top-level script
     scalaJSUseMainModuleInitializer   := true, // On Startup, call the main function
     webpackDevServerPort              := 12345,

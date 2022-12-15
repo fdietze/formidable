@@ -15,7 +15,7 @@ trait FormConfig {
     div(display.flex, VModifier.style("gap") := "0.5rem", subForms)
   def labeledFormGroup(subForms: Seq[(String, VModifier)]): VModifier =
     table(
-      subForms.map { case (label, subForm) => tr(td(b(label, ": "), verticalAlign := "top"), td(subForm)) },
+      subForms.map { case (label, subForm) => tr(td(b(label, ": "), verticalAlign := "top"), td(subForm)) }
     )
 
   def formSequence(subForms: Seq[VModifier], addButton: VModifier): VModifier =

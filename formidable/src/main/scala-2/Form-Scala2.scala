@@ -26,7 +26,7 @@ trait FormDerivation {
               val subForm = ((s: Var[param.PType], c) => param.typeclass.render(s, c))
                 .asInstanceOf[(Var[Any], FormConfig) => VModifier]
               param.label -> subForm(subState, config)
-            },
+            }
         )
       }: VModifier
     }
@@ -38,7 +38,6 @@ trait FormDerivation {
       defaultSubtype.typeclass.default
     }
     override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
-
       val selectedSubtype: Var[Subtype[Form, T]] =
         selectedValue.imap[Subtype[Form, T]](subType => subType.typeclass.default)(value => ctx.split(value)(identity))
 
