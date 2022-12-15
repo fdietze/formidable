@@ -1,0 +1,74 @@
+name: Formatter
+
+on:
+  pull_request:
+    types: [ opened ]
+  issue_comment:
+    types: [ created ]
+
+jobs:
+  format:
+    name: "Format"
+    runs-on: ubuntu-22.04
+    if: github.event.issue.pull_request
+    steps:
+      - uses: khan/pull-request-comment-trigger@edab8d9ba7759221187ef7120592a6fbfada0d18 # pin@v1.1.0
+        id: check
+        with:
+          trigger: '/format'
+          reaction: "+1" # Reaction must be one of the reactions here: https://developer.github.com/v3/reactions/#reaction-types
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+
+      - uses: actions/checkout@v3
+        if: steps.check.outputs.triggered == 'true'
+
+      # formatting
+      - uses: coursier/cache-action@v6
+      - uses: coursier/setup-action@v1
+        with:
+          jvm: adoptium:1.17
+          apps: sbt
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+          cache-dependency-path: formidable/package.json
+
+      - name: Check out PR
+        if: steps.check.outputs.triggered == 'true'
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: |
+          gh pr checkout ${{ github.event.issue.number }}
+
+      - name: Format Scala Code
+        if: steps.check.outputs.triggered == 'true'
+        run: |
+          # Runner has 7G of RAM.
+          # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+          SBT_OPTS="-XX:MaxHeapSize=6G" sbt \
+            scalafmtAll scalafmtSbt
+
+      - name: Commit changes
+        if: steps.check.outputs.triggered == 'true'
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+          git status
+          git diff --stat
+          git commit -am "chore: format code"
+
+          git log --oneline --max-count=10
+
+          git push
+
+      - uses: khan/pull-request-comment-trigger@v1.1.0
+        if: failure()
+        with:
+          trigger: '/format'
+          reaction: "confused" # Reaction must be one of the reactions here: https://developer.github.com/v3/reactions/#reaction-types
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
