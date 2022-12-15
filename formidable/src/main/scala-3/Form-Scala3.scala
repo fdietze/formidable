@@ -23,7 +23,7 @@ trait FormDerivation extends AutoDerivation[Form] {
             .map { case (param, subState) =>
               val subForm = (param.typeclass.render _).asInstanceOf[(Var[Any], FormConfig) => VModifier]
               param.label -> subForm(subState, config)
-            },
+            }
         )
       }: VModifier
     }
@@ -35,10 +35,9 @@ trait FormDerivation extends AutoDerivation[Form] {
       defaultSubtype.typeclass.default
     }
     override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
-
       val selectedSubtype: Var[SealedTrait.Subtype[Form, T, _]] =
         selectedValue.imap[SealedTrait.Subtype[Form, T, _]](subType => subType.typeclass.default)(value =>
-          ctx.choose(value)(_.subtype),
+          ctx.choose(value)(_.subtype)
         )
 
       config.unionSubform(

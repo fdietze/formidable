@@ -67,7 +67,7 @@ package object formidable {
         subForm = state.sequence.map(
           _.map { innerState =>
             Form[T].render(innerState, config)
-          },
+          }
         ),
         checkbox = config.checkbox(checkboxState),
       )
@@ -86,7 +86,7 @@ package object formidable {
             )
           },
           addButton = config.addButton(() => state.update(_ :+ Form[T].default)),
-        ),
+        )
       ): VModifier
     }
   }
