@@ -175,7 +175,7 @@ describe('Form interactions', () => {
   })
 
   it('GenericLinkedList (generics)', () => {
-    cy.get('.GenericLinkedList\\[Pet\\]').within(($form) => {
+    cy.get(".GenericLinkedList\\[Pet\\]").within(($form) => {
       cy.get('select').select('Cons')
       cy.get('.value').should('have.text', 'Cons(Cat(,4),Nil)')
       cy.contains('tr', 'tail:').within(($form) => {
