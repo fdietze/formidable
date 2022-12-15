@@ -3,6 +3,10 @@
 Generates reactive HTML forms directly from type definitions. These forms can be used with ScalaJS and [Outwatch](github.com/outwatch/outwatch) and the generated HTML/CSS is fully customizable. Scala 2.13 and 3 are supported. Here's a [Demo](https://fdietze.github.io/formidable) and it's [Code](demo/src/main/scala/Main.scala).
 
 ```scala
+libraryDependencies += "com.github.fdietze" %%% "formidable" % "<version>"
+```
+
+```scala
 import outwatch._
 import outwatch.dsl._
 import colibri.reactive._

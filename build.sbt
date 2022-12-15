@@ -23,7 +23,7 @@ inThisBuild(
 
 val versions = new {
   val outwatch  = "1.0.0-RC13"
-  val colibri   = "0.7.7"
+  val colibri   = "0.7.8"
   val funPack   = "0.3.2"
   val scalaTest = "3.2.12"
 }
@@ -70,7 +70,7 @@ lazy val formidable = project
       "com.github.cornerman" %%% "colibri"          % versions.colibri,
       "com.github.cornerman" %%% "colibri-reactive" % versions.colibri,
     ) ++
-      (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.2.0")
+      (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.2.5")
        else
          Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.2", "org.scala-lang" % "scala-reflect" % "2.13.10")),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
@@ -103,9 +103,9 @@ lazy val demo = project
       ModuleKind.CommonJSModule,
     )), // configure Scala.js to emit a JavaScript module instead of a top-level script
     scalaJSUseMainModuleInitializer   := true, // On Startup, call the main function
-    webpack / version               := "5.75.0",
-    webpackCliVersion               := "5.0.0",
-    startWebpackDevServer / version := "4.11.1",
+    webpack / version                 := "5.75.0",
+    webpackCliVersion                 := "5.0.0",
+    startWebpackDevServer / version   := "4.11.1",
     webpackDevServerPort              := 12345,
     webpackDevServerExtraArgs         := Seq("--color"),
     fullOptJS / webpackEmitSourceMaps := true,

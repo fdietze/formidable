@@ -2,6 +2,7 @@ name: Test
 on:
   push:
     branches: ["main"]
+    tags: [ v* ]
   pull_request:
     types: [ opened, synchronize ]
   workflow_dispatch:
@@ -59,7 +60,7 @@ jobs:
           ) &
 
       - name: Cypress run
-        uses: cypress-io/github-action@v4.2.0
+        uses: cypress-io/github-action@v5.0.0
 
       - name: Build production assets
         if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
