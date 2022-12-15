@@ -35,5 +35,7 @@ Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala)
 
 Automatic derivation is achieved using [Magnolia](https://github.com/softwaremill/magnolia).
 
+It keeps backups of already entered data wherever it can, to help the user.
+
 
 

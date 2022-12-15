@@ -208,4 +208,27 @@ describe('Form interactions', () => {
       cy.get('.value').should('have.text', 'Some(15)')
     })
   })
+
+  it('backup entered values (Option in case class)', () => {
+    cy.get('.Company').within(($form) => {
+      cy.contains('tr', 'address:').find('input[type="checkbox"]').check()
+      cy.contains('tr', 'city:').find('input[type="text"]').clear().type('Madrid')
+      cy.contains('tr', 'address:').find('input[type="checkbox"]').uncheck()
+      cy.contains('tr', 'address:').find('input[type="checkbox"]').check()
+      cy.get('.value').should('have.text', 'Company(,Some(Address(Madrid,)))') // test default value
+    })
+  })
+
+  it.only('backup entered values (nested sum types)', () => {
+    cy.get('.GenericLinkedList\\[Pet\\]').within(($form) => {
+      cy.get('select').select('Cons')
+      cy.contains('tr', 'name:').find('input[type="text"]').clear().type('Dog')
+      cy.contains('tr', 'head:').within(($form) => {
+        cy.get('select').select('Dog')
+        cy.get('select').select('Cat')
+      })
+
+      cy.get('.value').should('have.text', 'Cons(Cat(Dog,4),Nil)')
+    })
+  })
 })
