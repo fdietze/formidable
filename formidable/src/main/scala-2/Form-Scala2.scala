@@ -28,7 +28,7 @@ trait FormDerivation {
               .map { case (label, value) =>
                 s"$label: $value"
               }
-              .mkString(",")}",
+              .mkString(",")}"
         )
         config.labeledFormGroup(
           ctx.parameters
@@ -70,7 +70,6 @@ trait FormDerivation {
         subForm = selectedValue.map { newValue =>
           println(s"sum[${ctx.typeName.short}]: state changed: $newValue")
           ctx.split(newValue) { subtype =>
-
             val (formState, form) = subFormBackup.getOrElseUpdate(
               key = subtype,
               defaultValue = {
