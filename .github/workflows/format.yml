@@ -39,7 +39,7 @@ jobs:
       - name: Check out PR
         if: steps.check.outputs.triggered == 'true'
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           gh pr checkout ${{ github.event.issue.number }}
 
