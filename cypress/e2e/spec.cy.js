@@ -1,5 +1,5 @@
 describe('Form interactions', () => {
-  it('Load demo', () => {
+  beforeEach(() => {
     cy.visit('http://localhost:12345')
   })
 
