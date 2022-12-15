@@ -188,4 +188,47 @@ describe('Form interactions', () => {
       cy.get('.value').should('have.text', 'Cons(Cat(,4),Cons(Dog(,true),Nil))')
     })
   })
+
+  it('backup entered values (sealed trait)', () => {
+    cy.get('.Pet').within(($form) => {
+      cy.get('select').select('Cat')
+      cy.contains('tr', 'name:').find('input[type="text"]').clear().type('Tiger')
+      cy.get('select').select('Dog') // select different case
+      cy.get('select').select('Cat') // back to previously selected case
+      cy.get('.value').should('have.text', 'Cat(Tiger,4)') // test default value
+    })
+  })
+
+  it('backup entered values (Option[Int])', () => {
+    cy.get('.Option\\[Int\\]').within(($form) => {
+      cy.get('input[type="checkbox"]').check()
+      cy.get('input[type="text"]').clear().type('15')
+      cy.get('input[type="checkbox"]').uncheck()
+      cy.get('input[type="checkbox"]').check()
+      cy.get('.value').should('have.text', 'Some(15)')
+    })
+  })
+
+  it('backup entered values (Option in case class)', () => {
+    cy.get('.Company').within(($form) => {
+      cy.contains('tr', 'address:').find('input[type="checkbox"]').check()
+      cy.contains('tr', 'city:').find('input[type="text"]').clear().type('Madrid')
+      cy.contains('tr', 'address:').find('input[type="checkbox"]').uncheck()
+      cy.contains('tr', 'address:').find('input[type="checkbox"]').check()
+      cy.get('.value').should('have.text', 'Company(,Some(Address(Madrid,)))') // test default value
+    })
+  })
+
+  it('backup entered values (nested sum types)', () => {
+    cy.get('.GenericLinkedList\\[Pet\\]').within(($form) => {
+      cy.get('select').select('Cons')
+      cy.contains('tr', 'name:').find('input[type="text"]').clear().type('Dog')
+      cy.contains('tr', 'head:').within(($form) => {
+        cy.get('select').select('Dog')
+        cy.get('select').select('Cat')
+      })
+
+      cy.get('.value').should('have.text', 'Cons(Cat(Dog,4),Nil)')
+    })
+  })
 })

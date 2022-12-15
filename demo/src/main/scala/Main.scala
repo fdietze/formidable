@@ -16,6 +16,9 @@ object Pet {
   case class Cat(name: String, legs: Int = 4) extends Pet
 }
 
+case class Address(city: String, street: String)
+case class Company(name: String, address: Option[Address])
+
 case class Tree(value: Int = 2, children: Seq[Tree])
 
 sealed trait BinaryTree
@@ -50,6 +53,7 @@ object Main extends Extras {
       formFrame[Vector[Int]]("Vector[Int]"),
       formFrame[(Int, String, Option[Long])]("Tuple"),
       formFrame[Person]("Person"),
+      formFrame[Company]("Company"),
       formFrame[Pet]("Pet"),
       formFrame[Tree]("Tree"),
       formFrame[BinaryTree]("BinaryTree"),
