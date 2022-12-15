@@ -49,7 +49,7 @@ jobs:
           # Runner has 7G of RAM.
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
           SBT_OPTS="-XX:MaxHeapSize=6G" sbt \
-            scalafmtAll scalafmtSbt
+            scalafmtSbt +scalafmtAll 
 
       - name: Commit changes
         if: steps.check.outputs.triggered == 'true'
