@@ -58,10 +58,15 @@ package object formidable {
   implicit def optionForm[T: Form]: Form[Option[T]] = new Form[Option[T]] {
     def default = None
     def render(state: Var[Option[T]], config: FormConfig) = Owned {
+      var valueBackup: Option[T] = None
       val checkboxState = state.transformVar[Boolean](_.contramap {
-        case true  => Some(Form[T].default)
+        case true =>
+          valueBackup.orElse(Some(Form[T].default))
         case false => None
-      })(_.map(_.isDefined))
+      })(_.map { value =>
+        value.foreach(some => valueBackup = Some(some))
+        value.isDefined
+      })
 
       config.withCheckbox(
         subForm = state.sequence.map(

@@ -188,4 +188,24 @@ describe('Form interactions', () => {
       cy.get('.value').should('have.text', 'Cons(Cat(,4),Cons(Dog(,true),Nil))')
     })
   })
+
+  it('backup entered values (sealed trait)', () => {
+    cy.get('.Pet').within(($form) => {
+      cy.get('select').select('Cat')
+      cy.contains('tr', 'name:').find('input[type="text"]').clear().type('Tiger')
+      cy.get('select').select('Dog') // select different case
+      cy.get('select').select('Cat') // back to previously selected case
+      cy.get('.value').should('have.text', 'Cat(Tiger,4)') // test default value
+    })
+  })
+
+  it('backup entered values (Option[Int])', () => {
+    cy.get('.Option\\[Int\\]').within(($form) => {
+      cy.get('input[type="checkbox"]').check()
+      cy.get('input[type="text"]').clear().type('15')
+      cy.get('input[type="checkbox"]').uncheck()
+      cy.get('input[type="checkbox"]').check()
+      cy.get('.value').should('have.text', 'Some(15)')
+    })
+  })
 })

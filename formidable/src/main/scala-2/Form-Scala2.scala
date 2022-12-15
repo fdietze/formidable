@@ -2,6 +2,7 @@ package formidable
 
 import outwatch._
 import colibri.reactive._
+import scala.collection.mutable
 
 import magnolia1._
 
@@ -15,13 +16,23 @@ trait FormDerivation {
     override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
     override def render(state: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
-      val subStates: Var[Seq[Any]] =
+      println(s"product[${ctx.typeName.short}]: rendering")
+      val combinedFieldState: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
-      subStates.sequence.map { subStates =>
+      combinedFieldState.sequence.map { fieldStates =>
+        println(
+          s"product[${ctx.typeName.short}]: state changed: ${ctx.parameters
+              .map(_.label)
+              .zip(fieldStates.map(_.now()))
+              .map { case (label, value) =>
+                s"$label: $value"
+              }
+              .mkString(",")}",
+        )
         config.labeledFormGroup(
           ctx.parameters
-            .zip(subStates)
+            .zip(fieldStates)
             .map { case (param, subState) =>
               val subForm = ((s: Var[param.PType], c) => param.typeclass.render(s, c))
                 .asInstanceOf[(Var[Any], FormConfig) => VModifier]
@@ -38,8 +49,17 @@ trait FormDerivation {
       defaultSubtype.typeclass.default
     }
     override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+      println(s"sum[${ctx.typeName.short}]: rendering")
+
+      val valueBackup = mutable.HashMap.empty[Subtype[Form, T], T].withDefault(_.typeclass.default)
       val selectedSubtype: Var[Subtype[Form, T]] =
-        selectedValue.imap[Subtype[Form, T]](subType => subType.typeclass.default)(value => ctx.split(value)(identity))
+        selectedValue.imap[Subtype[Form, T]](subtype => valueBackup(subtype)) { value =>
+          val subtype = ctx.split(value)(identity)
+          valueBackup(subtype) = value
+          subtype
+        }
+
+      val subFormBackup = mutable.HashMap.empty[Subtype[Form, T], (Var[T], VModifier)]
 
       config.unionSubform(
         config.selectInput[Subtype[Form, T]](
@@ -47,9 +67,28 @@ trait FormDerivation {
           selectedValue = selectedSubtype,
           show = subtype => subtype.typeName.short,
         ),
-        subForm = selectedValue.map { value =>
-          ctx.split(value) { sub =>
-            VModifier.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(selectedValue, config))
+        subForm = selectedValue.map { newValue =>
+          println(s"sum[${ctx.typeName.short}]: state changed: $newValue")
+          ctx.split(newValue) { subtype =>
+
+            val (formState, form) = subFormBackup.getOrElseUpdate(
+              key = subtype,
+              defaultValue = {
+                val formInstance = subtype.typeclass.asInstanceOf[Form[T]]
+                val state        = Var(formInstance.default)
+                val form         = formInstance.render(state, config) // TODO: this is lazy and always re-rendered....
+                (state, form)
+              },
+            )
+
+            println(subFormBackup.size)
+
+            formState.set(newValue)
+
+            VModifier(
+              VModifier.managedEval(formState.observable.unsafeForeach(selectedValue.set)),
+              form,
+            )
           }
         },
       )
