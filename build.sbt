@@ -24,7 +24,7 @@ inThisBuild(
 val versions = new {
   val outwatch  = "1.0.0-RC13"
   val colibri   = "0.7.7"
-  val funPack   = "0.2.0"
+  val funPack   = "0.3.2"
   val scalaTest = "3.2.12"
 }
 
@@ -103,6 +103,9 @@ lazy val demo = project
       ModuleKind.CommonJSModule,
     )), // configure Scala.js to emit a JavaScript module instead of a top-level script
     scalaJSUseMainModuleInitializer   := true, // On Startup, call the main function
+    webpack / version               := "5.75.0",
+    webpackCliVersion               := "5.0.0",
+    startWebpackDevServer / version := "4.11.1",
     webpackDevServerPort              := 12345,
     webpackDevServerExtraArgs         := Seq("--color"),
     fullOptJS / webpackEmitSourceMaps := true,
