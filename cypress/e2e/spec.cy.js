@@ -219,7 +219,7 @@ describe('Form interactions', () => {
     })
   })
 
-  it.only('backup entered values (nested sum types)', () => {
+  it('backup entered values (nested sum types)', () => {
     cy.get('.GenericLinkedList\\[Pet\\]').within(($form) => {
       cy.get('select').select('Cons')
       cy.contains('tr', 'name:').find('input[type="text"]').clear().type('Dog')
