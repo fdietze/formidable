@@ -47,3 +47,6 @@ bin/
 cypress/screenshots
 cypress/videos
 */yarn.lock
+
+
+/.envrc.local
