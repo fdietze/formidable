@@ -42,11 +42,14 @@ trait FormDerivation {
       val selectedSubtype: Var[Subtype[Form, T]] =
         selectedValue.imap[Subtype[Form, T]](subType => subType.typeclass.default)(value => ctx.split(value)(identity))
 
+      def labelForSubtype(subtype: Subtype[Form, _]): String =
+        subtype.annotations.collectFirst { case Label(l) => l }.getOrElse(subtype.typeName.short)
+
       config.unionSubform(
         config.selectInput[Subtype[Form, T]](
           options = ctx.subtypes,
           selectedValue = selectedSubtype,
-          show = subtype => subtype.typeName.short,
+          show = labelForSubtype,
         ),
         subForm = selectedValue.map { value =>
           ctx.split(value) { sub =>

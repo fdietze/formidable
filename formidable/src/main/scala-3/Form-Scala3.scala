@@ -41,11 +41,14 @@ trait FormDerivation extends AutoDerivation[Form] {
           ctx.choose(value)(_.subtype)
         )
 
+      def labelForSubtype[Type, SType](subtype: SealedTrait.Subtype[Form, Type, SType]): String =
+        subtype.annotations.collectFirst { case Label(l) => l }.getOrElse(subtype.typeInfo.short)
+
       config.unionSubform(
         config.selectInput[SealedTrait.Subtype[Form, T, _]](
           options = ctx.subtypes,
           selectedValue = selectedSubtype,
-          show = subtype => subtype.typeInfo.short,
+          show = labelForSubtype,
         ),
         selectedValue.map { value =>
           ctx.choose(value) { sub =>
