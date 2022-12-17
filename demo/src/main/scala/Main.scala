@@ -11,7 +11,7 @@ case class Person(name: String, age: Int = 5)
 
 sealed trait Pet
 object Pet {
-  case class Dog(name: String, hungry: Boolean = true) extends Pet
+  case class Dog(name: String, @formidable.Label("Hungry?") hungry: Boolean = true) extends Pet
   @formidable.Default
   case class Cat(name: String, legs: Int = 4) extends Pet
 }

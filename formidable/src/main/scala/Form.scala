@@ -6,6 +6,9 @@ import outwatch._
 // used to mark default cases of sealed traits
 case class Default() extends scala.annotation.StaticAnnotation
 
+// used to customize labels for fields and types
+case class Label(label: String) extends scala.annotation.StaticAnnotation
+
 trait Form[T] {
   def default: T
   def render(

@@ -25,7 +25,8 @@ trait FormDerivation {
             .map { case (param, subState) =>
               val subForm = ((s: Var[param.PType], c) => param.typeclass.render(s, c))
                 .asInstanceOf[(Var[Any], FormConfig) => VModifier]
-              param.label -> subForm(subState, config)
+              val label = param.annotations.collectFirst { case Label(l) => l }.getOrElse(param.label + ":")
+              label -> subForm(subState, config)
             }
         )
       }: VModifier
