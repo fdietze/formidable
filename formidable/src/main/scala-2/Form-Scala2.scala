@@ -25,7 +25,8 @@ trait FormDerivation {
             .map { case (param, subState) =>
               val subForm = ((s: Var[param.PType], c) => param.typeclass.render(s, c))
                 .asInstanceOf[(Var[Any], FormConfig) => VModifier]
-              param.label -> subForm(subState, config)
+              val label = param.annotations.collectFirst { case Label(l) => l }.getOrElse(param.label + ":")
+              label -> subForm(subState, config)
             }
         )
       }: VModifier
@@ -41,11 +42,14 @@ trait FormDerivation {
       val selectedSubtype: Var[Subtype[Form, T]] =
         selectedValue.imap[Subtype[Form, T]](subType => subType.typeclass.default)(value => ctx.split(value)(identity))
 
+      def labelForSubtype(subtype: Subtype[Form, _]): String =
+        subtype.annotations.collectFirst { case Label(l) => l }.getOrElse(subtype.typeName.short)
+
       config.unionSubform(
         config.selectInput[Subtype[Form, T]](
           options = ctx.subtypes,
           selectedValue = selectedSubtype,
-          show = subtype => subtype.typeName.short,
+          show = labelForSubtype,
         ),
         subForm = selectedValue.map { value =>
           ctx.split(value) { sub =>

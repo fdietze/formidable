@@ -22,7 +22,8 @@ trait FormDerivation extends AutoDerivation[Form] {
             .zip(subStates)
             .map { case (param, subState) =>
               val subForm = (param.typeclass.render _).asInstanceOf[(Var[Any], FormConfig) => VModifier]
-              param.label -> subForm(subState, config)
+              val label   = param.annotations.collectFirst { case Label(l) => l }.getOrElse(param.label + ":")
+              label -> subForm(subState, config)
             }
         )
       }: VModifier
@@ -40,11 +41,14 @@ trait FormDerivation extends AutoDerivation[Form] {
           ctx.choose(value)(_.subtype)
         )
 
+      def labelForSubtype[Type, SType](subtype: SealedTrait.Subtype[Form, Type, SType]): String =
+        subtype.annotations.collectFirst { case Label(l) => l }.getOrElse(subtype.typeInfo.short)
+
       config.unionSubform(
         config.selectInput[SealedTrait.Subtype[Form, T, _]](
           options = ctx.subtypes,
           selectedValue = selectedSubtype,
-          show = subtype => subtype.typeInfo.short,
+          show = labelForSubtype,
         ),
         selectedValue.map { value =>
           ctx.choose(value) { sub =>
