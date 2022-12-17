@@ -22,7 +22,7 @@ sealed trait BinaryTree
 object BinaryTree {
   @formidable.Default
   @formidable.Label("Leaf Node")
-  case class Leaf(value: Int)                            extends BinaryTree
+  case class Leaf(value: Int) extends BinaryTree
   @formidable.Label("Branch Node")
   case class Branch(left: BinaryTree, right: BinaryTree) extends BinaryTree
 }
