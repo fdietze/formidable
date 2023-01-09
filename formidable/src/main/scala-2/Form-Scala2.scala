@@ -14,7 +14,7 @@ trait FormDerivation {
   def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
     override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    override def render(state: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+    override def render(state: Var[T], config: FormConfig): VModifier = {
       val subStates: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
@@ -38,7 +38,7 @@ trait FormDerivation {
       val defaultSubtype = ctx.subtypes.find(_.annotations.exists(_.isInstanceOf[Default])).getOrElse(ctx.subtypes.head)
       defaultSubtype.typeclass.default
     }
-    override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+    override def render(selectedValue: Var[T], config: FormConfig): VModifier = {
       val selectedSubtype: Var[Subtype[Form, T]] =
         selectedValue.imap[Subtype[Form, T]](subType => subType.typeclass.default)(value => ctx.split(value)(identity))
 

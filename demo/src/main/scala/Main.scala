@@ -3,7 +3,6 @@ package webapp
 import outwatch._
 import outwatch.dsl._
 import cats.effect.SyncIO
-import colibri.reactive._
 
 import formidable._
 
@@ -59,7 +58,7 @@ object Main extends Extras {
     )
   }
 
-  def formFrame[T: Form](name: String): VModifier = Owned {
+  def formFrame[T: Form](name: String): VModifier = {
     val state = Form.state[T]
     div(
       cls          := name,

@@ -54,7 +54,7 @@ trait FormConfig {
     state: Var[String],
     inputPlaceholder: String = "",
     validationMessage: Rx[Option[String]] = Rx.const(None),
-  ): VModifier = Owned {
+  ): VModifier =
     div(
       input(
         tpe         := "text",
@@ -63,18 +63,15 @@ trait FormConfig {
         onInput.stopPropagation.value --> state,
       ),
       validationMessage.map(_.map(msg => div(msg, color.red))),
-    ): VModifier
-  }
+    )
 
   def selectInput[T](options: Seq[T], selectedValue: Var[T], show: T => String): VModifier = {
     select(
-      Owned.function { implicit owner =>
-        options.zipWithIndex.map { case (opt, ind) =>
-          option(dsl.value := ind.toString)(
-            show(opt),
-            selectedValue.map(sel => selected := opt == sel),
-          )
-        }
+      options.zipWithIndex.map { case (opt, ind) =>
+        option(dsl.value := ind.toString)(
+          show(opt),
+          selectedValue.map(sel => selected := opt == sel),
+        )
       },
       onChange.value.map(index => options(index.toInt)) --> selectedValue,
     )
