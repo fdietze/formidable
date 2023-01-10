@@ -146,6 +146,7 @@ describe('Form interactions', () => {
       cy.get('.value').should('have.text', 'Cat(Tiger,4)') // test default value
       cy.get('select').select('Dog')
       cy.get('.value').should('have.text', 'Dog(,true)') // test default value
+      cy.get('table > tr:nth-child(2)').should('have.text', 'Hungry?') // test Label("Hungry?")
     })
   })
 
@@ -164,10 +165,10 @@ describe('Form interactions', () => {
 
   it('BinaryTree (recursive sealed trait)', () => {
       cy.get('.BinaryTree').within(($form) => {
-      cy.get('select').select('Branch')
+      cy.get('select').select('Branch Node')
       cy.get('.value').should('have.text', 'Branch(Leaf(0),Leaf(0))')
-      cy.contains('tr', 'right:').contains('select', 'Leaf').select('Branch')
-      cy.contains('tr', 'left:').contains('select', 'Leaf').select('Branch')
+      cy.contains('tr', 'right:').contains('select', 'Leaf Node').select('Branch Node')
+      cy.contains('tr', 'left:').contains('select', 'Leaf Node').select('Branch Node')
       cy.get('.value').should('have.text', 'Branch(Branch(Leaf(0),Leaf(0)),Branch(Leaf(0),Leaf(0)))')
       cy.get('input[type="text"]').each((elem,index) => cy.wrap(elem).clear().type(index))
       cy.get('.value').should('have.text', 'Branch(Branch(Leaf(0),Leaf(1)),Branch(Leaf(2),Leaf(3)))')

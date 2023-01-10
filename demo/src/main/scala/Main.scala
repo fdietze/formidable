@@ -11,7 +11,7 @@ case class Person(name: String, age: Int = 5)
 
 sealed trait Pet
 object Pet {
-  case class Dog(name: String, hungry: Boolean = true) extends Pet
+  case class Dog(name: String, @formidable.Label("Hungry?") hungry: Boolean = true) extends Pet
   @formidable.Default
   case class Cat(name: String, legs: Int = 4) extends Pet
 }
@@ -21,7 +21,9 @@ case class Tree(value: Int = 2, children: Seq[Tree])
 sealed trait BinaryTree
 object BinaryTree {
   @formidable.Default
-  case class Leaf(value: Int)                            extends BinaryTree
+  @formidable.Label("Leaf Node")
+  case class Leaf(value: Int) extends BinaryTree
+  @formidable.Label("Branch Node")
   case class Branch(left: BinaryTree, right: BinaryTree) extends BinaryTree
 }
 
