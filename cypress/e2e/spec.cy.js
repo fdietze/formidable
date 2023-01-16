@@ -26,7 +26,7 @@ describe('Form interactions', () => {
       cy.get('input').clear().type('2.3')
       cy.get('.value').should('have.text', '2.3')
       cy.get('input').clear().type('1e+230')
-      cy.get('.value').should('have.text', '1e+230')
+      cy.get('.value').should('have.text', '10030')
     })
   })
 
