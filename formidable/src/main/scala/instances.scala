@@ -94,19 +94,14 @@ package object formidable {
     decode: String => Either[String, T],
     config: FormConfig,
   ): VModifier = {
-    val fieldState                             = Var(encode(state.now()))
-    val validationMessage: Var[Option[String]] = Var(None)
-
-    VModifier(
-      VModifier.managedSubscribe(state.map { value => fieldState.set(encode(value)) }),
-      VModifier.managedSubscribe(fieldState.map(decode).map {
-        case Left(msg) =>
-          validationMessage.set(Some(msg))
-        case Right(value) =>
-          validationMessage.set(None)
-          state.set(value)
-      }),
-      config.textInput(fieldState, validationMessage = validationMessage)
+    val validatedFieldState: Var[(String, Either[String, T])] = Var.createStateful(
+      state.contramapIterable { case (_, decoded) => decoded.toOption },
+      state.map(t => (encode(t), Right(t))),
     )
+
+    val fieldState = validatedFieldState.imap[String](str => (str, decode(str)))(_._1)
+    val validationMessage = validatedFieldState.map { case (_, decoded) => decoded.left.toOption }
+
+    config.textInput(fieldState, validationMessage = validationMessage)
   }
 }
