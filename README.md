@@ -23,10 +23,11 @@ div(
 )
 ```
 
-Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala) with many default instances:
+Formidable defines a typeclass [`Form[T]`](formidable/src/main/scala/Form.scala) with many default [instances](formidable/src/main/scala/instances.scala):
 - Primitives: `Int`, `Double`, `Long`, `String`, `Boolean`
-- `Option[T]`
+- `Option[T]`, `Either[A,B]`
 - `Seq[T]`, `Vector[T]`, `List[T]`
+- `Map[K,V]`
 - sealed traits
 - tuples
 - case classes
