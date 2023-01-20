@@ -100,7 +100,7 @@ package object formidable {
     )
 
     val fieldState        = validatedFieldState.imap[String](str => (str, decode(str)))(_._1)
-    val validationMessage = validatedFieldState.map { case (_, decoded) => decoded.left.toOption }
+    val validationMessage = validatedFieldState.map(_._2.left.toOption)
 
     config.textInput(fieldState, validationMessage = validationMessage)
   }
