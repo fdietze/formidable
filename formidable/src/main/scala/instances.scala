@@ -87,7 +87,7 @@ package object formidable {
           },
           addButton = config.addButton(() => state.update(_ :+ Form[T].default)),
         )
-      ): VModifier
+      ): VMod
     }
   }
 
@@ -99,7 +99,7 @@ package object formidable {
     encode: T => String,
     decode: String => Either[String, T],
     config: FormConfig,
-  )(implicit owner: Owner): VModifier = {
+  )(implicit owner: Owner): VMod = {
     val fieldState                             = Var(encode(state.now()))
     val validationMessage: Var[Option[String]] = Var(None)
 
