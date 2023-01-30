@@ -14,7 +14,7 @@ trait FormDerivation {
   def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
     override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    override def render(state: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+    override def render(state: Var[T], config: FormConfig): VMod = Owned.function { implicit owner =>
       val subStates: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
@@ -24,12 +24,12 @@ trait FormDerivation {
             .zip(subStates)
             .map { case (param, subState) =>
               val subForm = ((s: Var[param.PType], c) => param.typeclass.render(s, c))
-                .asInstanceOf[(Var[Any], FormConfig) => VModifier]
+                .asInstanceOf[(Var[Any], FormConfig) => VMod]
               val label = param.annotations.collectFirst { case Label(l) => l }.getOrElse(param.label + ":")
               label -> subForm(subState, config)
             }
         )
-      }: VModifier
+      }: VMod
     }
   }
 
@@ -38,7 +38,7 @@ trait FormDerivation {
       val defaultSubtype = ctx.subtypes.find(_.annotations.exists(_.isInstanceOf[Default])).getOrElse(ctx.subtypes.head)
       defaultSubtype.typeclass.default
     }
-    override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+    override def render(selectedValue: Var[T], config: FormConfig): VMod = Owned.function { implicit owner =>
       val selectedSubtype: Var[Subtype[Form, T]] =
         selectedValue.imap[Subtype[Form, T]](subType => subType.typeclass.default)(value => ctx.split(value)(identity))
 
@@ -53,7 +53,7 @@ trait FormDerivation {
         ),
         subForm = selectedValue.map { value =>
           ctx.split(value) { sub =>
-            VModifier.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(selectedValue, config))
+            VMod.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(selectedValue, config))
           }
         },
       )
