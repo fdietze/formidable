@@ -60,7 +60,7 @@ jobs:
           ) &
 
       - name: Cypress run
-        uses: cypress-io/github-action@v5.8.3
+        uses: cypress-io/github-action@v6.1.0
 
       - name: Build production assets
         if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
@@ -79,7 +79,7 @@ jobs:
 
       - name: Deploy to Github Pages
         if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
-        uses: JamesIves/github-pages-deploy-action@v4.4.2
+        uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: demo/target/scala-2.13/scalajs-bundler/main/dist # The folder the action should deploy.
