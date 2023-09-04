@@ -60,7 +60,7 @@ jobs:
           ) &
 
       - name: Cypress run
-        uses: cypress-io/github-action@v6.1.0
+        uses: cypress-io/github-action@v6.4.0
 
       - name: Build production assets
         if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
