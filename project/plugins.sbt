@@ -1,7 +1,7 @@
 addSbtPlugin("org.scala-js"  % "sbt-scalajs"         % "1.13.2")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1")
 
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.4")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.1")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt" % "2.5.1")
 
 // for reading npmDependencies from package.json
