@@ -58,7 +58,7 @@ object Main extends Extras {
     )
   }
 
-  def formFrame[T: Form](name: String): VModifier = {
+  def formFrame[T: Form](name: String): VMod = {
     val state = Form.state[T]
     div(
       cls          := name,
@@ -68,6 +68,6 @@ object Main extends Extras {
       div(i(name)),
       Form[T].render(state),
       div("value: ", span(cls := "value", state.map(_.toString))),
-    ): VModifier
+    ): VMod
   }
 }

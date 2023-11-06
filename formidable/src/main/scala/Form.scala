@@ -14,14 +14,14 @@ trait Form[T] {
   def render(
     state: Var[T] = Var(default),
     config: FormConfig = FormConfig.default,
-  ): VModifier
+  ): VMod
 
   def imap[S](f: T => S)(g: S => T): Form[S] = new Form[S] {
     override def default: S = f(Form.this.default)
     override def render(
       state: Var[S],
       config: FormConfig,
-    ): VModifier = Form.this.render(state.imap(f)(g), config)
+    ): VMod = Form.this.render(state.imap(f)(g), config)
   }
 }
 

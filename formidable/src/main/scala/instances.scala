@@ -93,7 +93,7 @@ package object formidable {
     encode: T => String,
     decode: String => Either[String, T],
     config: FormConfig,
-  ): VModifier = {
+  ): VMod = {
     val validatedFieldState: Var[(String, Either[String, T])] = Var.createStateful(
       state.contramapIterable { case (_, decoded) => decoded.toOption },
       state.map(t => (encode(t), Right(t))),

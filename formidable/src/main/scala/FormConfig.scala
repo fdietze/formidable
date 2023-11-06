@@ -5,29 +5,29 @@ import outwatch.dsl._
 import colibri.reactive._
 
 trait FormConfig {
-  def withRemoveButton(subForm: VModifier, removeButton: VModifier): VModifier =
+  def withRemoveButton(subForm: VMod, removeButton: VMod): VMod =
     div(display.flex, alignItems.flexStart, removeButton, subForm)
-  def withCheckbox(subForm: VModifier, checkbox: VModifier): VModifier =
+  def withCheckbox(subForm: VMod, checkbox: VMod): VMod =
     div(display.flex, alignItems.flexStart, checkbox, subForm)
-  def withLabel(subForm: VModifier, label: VModifier): VModifier = div(display.flex, label, subForm)
+  def withLabel(subForm: VMod, label: VMod): VMod = div(display.flex, label, subForm)
 
-  def unlabeledFormGroup(subForms: Seq[VModifier]): VModifier =
-    div(display.flex, VModifier.style("gap") := "0.5rem", subForms)
-  def labeledFormGroup(subForms: Seq[(String, VModifier)]): VModifier =
+  def unlabeledFormGroup(subForms: Seq[VMod]): VMod =
+    div(display.flex, VMod.style("gap") := "0.5rem", subForms)
+  def labeledFormGroup(subForms: Seq[(String, VMod)]): VMod =
     table(
       subForms.map { case (label, subForm) => tr(td(b(label), verticalAlign := "top"), td(subForm)) }
     )
 
-  def formSequence(subForms: Seq[VModifier], addButton: VModifier): VModifier =
+  def formSequence(subForms: Seq[VMod], addButton: VMod): VMod =
     div(
       display.flex,
       flexDirection.column,
-      VModifier.style("gap") := "0.5rem",
+      VMod.style("gap") := "0.5rem",
       subForms,
       addButton,
     )
 
-  def addButton(action: () => Unit): VModifier =
+  def addButton(action: () => Unit): VMod =
     button(
       "add",
       onClick.stopPropagation.doAction {
@@ -35,7 +35,7 @@ trait FormConfig {
       },
     )
 
-  def removeButton(action: () => Unit): VModifier =
+  def removeButton(action: () => Unit): VMod =
     button(
       "remove",
       onClick.stopPropagation.doAction {
@@ -43,7 +43,7 @@ trait FormConfig {
       },
     )
 
-  def checkbox(state: Var[Boolean]): VModifier =
+  def checkbox(state: Var[Boolean]): VMod =
     input(
       tpe := "checkbox",
       checked <-- state,
@@ -54,7 +54,7 @@ trait FormConfig {
     state: Var[String],
     inputPlaceholder: String = "",
     validationMessage: Rx[Option[String]] = Rx.const(None),
-  ): VModifier =
+  ): VMod =
     div(
       input(
         tpe         := "text",
@@ -65,7 +65,7 @@ trait FormConfig {
       validationMessage.map(_.map(msg => div(msg, color.red))),
     )
 
-  def selectInput[T](options: Seq[T], selectedValue: Var[T], show: T => String): VModifier = {
+  def selectInput[T](options: Seq[T], selectedValue: Var[T], show: T => String): VMod = {
     select(
       options.zipWithIndex.map { case (opt, ind) =>
         option(dsl.value := ind.toString)(
@@ -77,7 +77,7 @@ trait FormConfig {
     )
   }
 
-  def unionSubform(selectForm: VModifier, subForm: VModifier) = div(selectForm, subForm)
+  def unionSubform(selectForm: VMod, subForm: VMod) = div(selectForm, subForm)
 }
 object FormConfig {
   val default: FormConfig = new FormConfig {}
