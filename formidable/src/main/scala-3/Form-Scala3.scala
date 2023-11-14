@@ -12,7 +12,7 @@ trait FormDerivation extends AutoDerivation[Form] {
   override def join[T](ctx: CaseClass[Typeclass, T]): Form[T] = new Form[T] {
     override def default: T = ctx.construct(param => param.default.getOrElse(param.typeclass.default))
 
-    override def render(state: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+    override def render(state: Var[T], config: FormConfig): VMod = Owned.function { implicit owner =>
       val subStates: Var[Seq[Any]] =
         state.imap[Seq[Any]](seq => ctx.rawConstruct(seq))(_.asInstanceOf[Product].productIterator.toList)
 
@@ -21,12 +21,12 @@ trait FormDerivation extends AutoDerivation[Form] {
           ctx.params
             .zip(subStates)
             .map { case (param, subState) =>
-              val subForm = (param.typeclass.render _).asInstanceOf[(Var[Any], FormConfig) => VModifier]
+              val subForm = (param.typeclass.render _).asInstanceOf[(Var[Any], FormConfig) => VMod]
               val label   = param.annotations.collectFirst { case Label(l) => l }.getOrElse(param.label + ":")
               label -> subForm(subState, config)
             }
         )
-      }: VModifier
+      }: VMod
     }
   }
 
@@ -35,7 +35,7 @@ trait FormDerivation extends AutoDerivation[Form] {
       val defaultSubtype = ctx.subtypes.find(_.annotations.exists(_.isInstanceOf[Default])).getOrElse(ctx.subtypes.head)
       defaultSubtype.typeclass.default
     }
-    override def render(selectedValue: Var[T], config: FormConfig): VModifier = Owned.function { implicit owner =>
+    override def render(selectedValue: Var[T], config: FormConfig): VMod = Owned.function { implicit owner =>
       val selectedSubtype: Var[SealedTrait.Subtype[Form, T, _]] =
         selectedValue.imap[SealedTrait.Subtype[Form, T, _]](subType => subType.typeclass.default)(value =>
           ctx.choose(value)(_.subtype)
@@ -52,7 +52,7 @@ trait FormDerivation extends AutoDerivation[Form] {
         ),
         selectedValue.map { value =>
           ctx.choose(value) { sub =>
-            VModifier.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(selectedValue, config))
+            VMod.when(value.isInstanceOf[T])(sub.typeclass.asInstanceOf[Form[T]].render(selectedValue, config))
           }
         },
       )
