@@ -21,7 +21,7 @@ trait Form[T] {
     override def render(
       state: Var[S],
       config: FormConfig,
-    ): VMod = Owned { Form.this.render(state.imap(f)(g), config) }
+    ): VMod = Form.this.render(state.imap(f)(g), config)
   }
 }
 
