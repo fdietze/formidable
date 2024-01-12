@@ -22,7 +22,7 @@ inThisBuild(
 )
 
 val versions = new {
-  val outwatch = "1.0.0-RC18"
+  val outwatch = "1.0.0"
   val colibri  = "0.8.1"
 
   val funPack   = "0.3.2"
@@ -73,7 +73,7 @@ lazy val formidable = project
     ) ++
       (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.3.0")
        else
-         Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.6", "org.scala-lang" % "scala-reflect" % "2.13.12")),
+         Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.8", "org.scala-lang" % "scala-reflect" % "2.13.12")),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
     Compile / npmDevDependencies ++= readJsDependencies(baseDirectory.value, "devDependencies"),
     useYarn                       := true, // Makes scalajs-bundler use yarn instead of npm
