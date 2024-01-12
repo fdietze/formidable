@@ -22,7 +22,7 @@ inThisBuild(
 )
 
 val versions = new {
-  val outwatch = "1.0.0-RC18"
+  val outwatch = "1.0.0"
   val colibri  = "0.8.1"
 
   val funPack   = "0.3.2"
