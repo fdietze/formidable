@@ -2,8 +2,8 @@ Global / onChangedBuildSource := IgnoreSourceChanges // not working well with we
 
 name                           := "Formidable"
 ThisBuild / organization       := "com.github.fdietze"
-ThisBuild / crossScalaVersions := Seq("2.13.12", "3.3.1")
-ThisBuild / scalaVersion       := "2.13.12"
+ThisBuild / crossScalaVersions := Seq("2.13.14", "3.3.1")
+ThisBuild / scalaVersion       := "2.13.14"
 
 inThisBuild(
   List(
