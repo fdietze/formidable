@@ -2,8 +2,8 @@ Global / onChangedBuildSource := IgnoreSourceChanges // not working well with we
 
 name                           := "Formidable"
 ThisBuild / organization       := "com.github.fdietze"
-ThisBuild / crossScalaVersions := Seq("2.13.12", "3.3.1")
-ThisBuild / scalaVersion       := "2.13.12"
+ThisBuild / crossScalaVersions := Seq("2.13.15", "3.5.2")
+ThisBuild / scalaVersion       := crossScalaVersions.value.head
 
 inThisBuild(
   List(
@@ -14,7 +14,7 @@ inThisBuild(
       Developer(
         "fdietze",
         "Felix Dietze",
-        "mail@felx.me",
+        "github@felx.me",
         url("https://github.com/fdietze"),
       )
     ),
