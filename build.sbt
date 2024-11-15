@@ -56,7 +56,6 @@ lazy val commonSettings = Seq(
   scalacOptions ++= (if (isScala3.value) Nil
                      else Seq("-Vimplicits", "-Vtype-diffs")), // better error messages for implicit resolution
   scalacOptions ++= (if (isScala3.value) Seq("-Yretain-trees") else Nil), // recursive data structures with Scala 3
-  scalacOptions ++= (if (isScala3.value) Seq("-scalajs") else Nil),       // needed for Scala3 + ScalaJS
 )
 
 lazy val formidable = project
