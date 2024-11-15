@@ -21,7 +21,7 @@ trait FormDerivation extends AutoDerivation[Form] {
           ctx.params
             .zip(subStates)
             .map { case (param, subState) =>
-              val subForm = (param.typeclass.render ?).asInstanceOf[(Var[Any], FormConfig) => VMod]
+              val subForm = (param.typeclass.render).asInstanceOf[(Var[Any], FormConfig) => VMod]
               val label   = param.annotations.collectFirst { case Label(l) => l }.getOrElse(param.label + ":")
               label -> subForm(subState, config)
             }
