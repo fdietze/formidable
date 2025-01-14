@@ -70,7 +70,7 @@ lazy val formidable = project
       "com.github.cornerman" %%% "colibri"          % versions.colibri,
       "com.github.cornerman" %%% "colibri-reactive" % versions.colibri,
     ) ++
-      (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.3.8")
+      (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.3.9")
        else
          Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.10", "org.scala-lang" % "scala-reflect" % "2.13.15")),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
