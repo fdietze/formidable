@@ -72,7 +72,7 @@ lazy val formidable = project
     ) ++
       (if (isScala3.value) Seq("com.softwaremill.magnolia1_3" %%% "magnolia" % "1.3.16")
        else
-         Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.10", "org.scala-lang" % "scala-reflect" % "2.13.15")),
+         Seq("com.softwaremill.magnolia1_2" %%% "magnolia" % "1.1.10", "org.scala-lang" % "scala-reflect" % "2.13.18")),
     Compile / npmDependencies    ++= readJsDependencies(baseDirectory.value, "dependencies"),
     Compile / npmDevDependencies ++= readJsDependencies(baseDirectory.value, "devDependencies"),
     useYarn                       := true, // Makes scalajs-bundler use yarn instead of npm
