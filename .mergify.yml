@@ -1,3 +1,29 @@
+queue_rules:
+  - name: Merge dependency-update PRs
+    queue_conditions:
+      - label=dependencies
+      - base=main
+    merge_conditions: []
+    merge_method: squash
+  - name: Merge PRs using label (rebase)
+    queue_conditions:
+      - label=ready-to-merge-rebase
+      - base=main
+      - "#review-requested=0"
+      - "#changes-requested-reviews-by=0"
+      - "#review-threads-unresolved=0"
+    merge_conditions: []
+    merge_method: rebase
+  - name: Merge PRs using label (squash)
+    queue_conditions:
+      - label=ready-to-merge-squash
+      - base=main
+      - "#review-requested=0"
+      - "#changes-requested-reviews-by=0"
+      - "#review-threads-unresolved=0"
+    merge_conditions: []
+    merge_method: squash
+
 pull_request_rules:
   - name: Label Scala Steward PRs
     conditions:
@@ -5,37 +31,8 @@ pull_request_rules:
     actions:
       label:
         add: [dependencies, scala]
-
-  - name: Merge dependency-update PRs
-    conditions:
-      - label=dependencies
-      - base=main
+  - name: Merge PRs using label (rebase) + Merge PRs using label (squash) + Merge
+      dependency-update PRs
+    conditions: []
     actions:
       queue:
-        name: default
-        method: squash
-
-
-  - name: Merge PRs using label (rebase)
-    conditions:
-      - label=ready-to-merge-rebase
-      - base=main
-      - "#review-requested=0"
-      - "#changes-requested-reviews-by=0"
-      - "#review-threads-unresolved=0"
-    actions:
-      queue:
-        name: default
-        method: rebase
-
-  - name: Merge PRs using label (squash)
-    conditions:
-      - label=ready-to-merge-squash
-      - base=main
-      - "#review-requested=0"
-      - "#changes-requested-reviews-by=0"
-      - "#review-threads-unresolved=0"
-    actions:
-      queue:
-        name: default
-        method: squash
