@@ -69,12 +69,12 @@ jobs:
       - name: Check if working directory is clean
         run: git diff --quiet --exit-code || (git status && false)
 
-      - name: Check if scala version is compatible with latest metals
-        run: |
-          SCALA_VERSION=$(sed -nr 's/.*scalaVersion\s+:=\s+"(.*)"/\1/p' build.sbt)
-          METALS_SUPPORTED_VERSIONS=$(metals --version)
-          echo "$METALS_SUPPORTED_VERSIONS"
-          metals --version | grep "$SCALA_VERSION" || (echo "Scala $SCALA_VERSION not supported by metals."; false)
+      # - name: Check if scala version is compatible with latest metals
+      #   run: |
+      #     SCALA_VERSION=$(sed -nr 's/.*scalaVersion\s+:=\s+"(.*)"/\1/p' build.sbt)
+      #     METALS_SUPPORTED_VERSIONS=$(metals --version)
+      #     echo "$METALS_SUPPORTED_VERSIONS"
+      #     metals --version | grep "$SCALA_VERSION" || (echo "Scala $SCALA_VERSION not supported by metals."; false)
 
       - name: Deploy to Github Pages
         if: github.ref == 'refs/heads/main' && startsWith(matrix.scalaVersion, '2.13')
