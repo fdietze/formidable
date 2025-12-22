@@ -25,7 +25,7 @@ jobs:
 
       # formatting
       - uses: coursier/cache-action@v6
-      - uses: coursier/setup-action@v1
+      - uses: coursier/setup-action@v2
         with:
           jvm: adoptium:1.17
           apps: sbt
