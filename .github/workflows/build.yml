@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: coursier/cache-action@v7
+      - uses: coursier/cache-action@v8
       - uses: olafurpg/setup-scala@v14
         with:
           jvm: adoptium:1.17
@@ -102,7 +102,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0 # full history with tags
 
-      - uses: coursier/cache-action@v6
+      - uses: coursier/cache-action@v8
       - uses: coursier/setup-action@v1
         with:
           jvm: adoptium:1.17
